@@ -21,6 +21,11 @@ jobs:
     - name: Install bump2version
       run: pip install bump2version
 
+    - name: Configure Git
+      run: |
+        git config --global user.name "heysus-me"
+        git config --global user.email "vksjesus@gmail.com"
+    
     - name: Bump version and create tag
       run: |
         bump2version patch --allow-dirty
