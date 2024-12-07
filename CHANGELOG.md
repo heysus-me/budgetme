@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]\n\n## [0.1.1] - 2024-12-07
 - Initial project setup.
 - Basic Flask application with a home route.
+- Flask-SQLAlchemy setup completed; querying users is functional.
+- Wrote Containerfile to containerize the Flask application.
 
 ## [0.1.0] - YYYY-MM-DD
 ### Added

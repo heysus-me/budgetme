@@ -15,12 +15,12 @@
 ## **Project Milestones**
 
 ### **1. Initial Setup**
-- [ ] Set up **Python** and **Flask** environment.
-- [ ] Create the basic **Flask app** with a home page.
-- [ ] Set up **SQLite database** with Flask-SQLAlchemy.
-- [ ] Write **Podmanfile** for containerization.
+- [x] Set up **Python** and **Flask** environment.
+- [x] Create the basic **Flask app** with a home page.
+- [x] Set up **SQLite database** with Flask-SQLAlchemy.
+- [x] Write **Podmanfile** for containerization.
 
-**Estimated Completion Date:** [Date]
+**Completion Date:** [12/07/2025]
 
 ---
 
@@ -31,7 +31,7 @@
 - [ ] Create a simple homepage with form inputs for transactions.
 - [ ] Develop budget overview page with transaction summary.
 
-**Estimated Completion Date:** [Date]
+**Estimated Completion Date:** [12/31/2025]
 
 ---
 
