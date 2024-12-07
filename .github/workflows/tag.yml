@@ -25,6 +25,10 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Update changelog
+        run: |
+          cz bump --changelog
+
       - name: Bump version and create tag
         run: |
           bump2version patch

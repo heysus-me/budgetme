@@ -1,3 +1,4 @@
 Flask==3.1.0
 bump2version==1.0.1
 flask-sqlalchemy==3.1.1
+commitizen==4.1.0
