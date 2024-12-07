@@ -23,7 +23,6 @@ jobs:
 
     - name: Bump version and create tag
       run: |
-        cd budgetme-app
         bump2version patch --allow-dirty
         git push --follow-tags
       env:
