@@ -1,0 +1,30 @@
+name: Bump version and tag
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+
+    - name: Install bump2version
+      run: pip install bump2version
+
+    - name: Bump version and create tag
+      run: |
+        cd budgetme-app
+        bump2version patch --allow-dirty
+        git push --follow-tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
