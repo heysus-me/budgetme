@@ -6,29 +6,24 @@ on:
       - main
 
 jobs:
-  bump-version:
+  release:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
 
-    - name: Install bump2version
-      run: pip install bump2version
+      - name: Install dependencies
+        run: pip install bump2version
 
-    - name: Configure Git
-      run: |
-        git config --global user.name "heysus-me"
-        git config --global user.email "vksjesus@gmail.com"
-    
-    - name: Bump version and create tag
-      run: |
-        bump2version patch --allow-dirty
-        git push --follow-tags
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+      - name: Bump version and create tag
+        run: |
+          bump2version ${{ github.event.inputs.release_type }}  # patch, minor, or major
+
+      - name: Push changes and tags
+        run: |
+          git push --follow-tags
