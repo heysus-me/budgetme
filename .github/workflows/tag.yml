@@ -18,16 +18,12 @@ jobs:
           python-version: 3.9
 
       - name: Install dependencies
-        run: pip install bump2version commitizen
+        run: pip install bump2version
 
       - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Update changelog
-        run: |
-          cz bump --changelog
 
       - name: Bump version and create tag
         run: |
@@ -35,4 +31,4 @@ jobs:
 
       - name: Push changes and tags
         run: |
-          git push --follow-tags origin main
+          git push --follow-tags
