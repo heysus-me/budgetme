@@ -31,4 +31,4 @@ jobs:
         bump2version patch --allow-dirty
         git push --follow-tags
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
