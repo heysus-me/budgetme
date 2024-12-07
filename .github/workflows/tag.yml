@@ -21,6 +21,11 @@ jobs:
     - name: Install bump2version
       run: pip install bump2version
 
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
     - name: Bump version and create tag
       run: |
         bump2version patch --allow-dirty
