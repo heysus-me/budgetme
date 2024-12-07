@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Containerized deployment with Podman.
 - Basic UI for managing budgets.
 
+## v0.1.4 (2024-12-07)
+
+### Fix
+
+- remove changelog workflow
+
 ## v0.1.3 (2024-12-07)
 
 ### Fix
