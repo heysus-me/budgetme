@@ -22,7 +22,7 @@ jobs:
 
       - name: Bump version and create tag
         run: |
-          bump2version ${{ github.event.inputs.release_type }}  # patch, minor, or major
+          bump2version patch
 
       - name: Push changes and tags
         run: |
