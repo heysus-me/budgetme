@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Welcome to the Budget App!</h2>
+    <h2>Budgets</h2>
+    <ul>
+        {% for budget in budgets %}
+            <li>{{ budget.name }}: ${{ budget.amount }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

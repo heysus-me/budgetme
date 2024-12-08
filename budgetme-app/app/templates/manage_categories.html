@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Manage Categories</h2>
+
+    <!-- Form to Add Category -->
+    <form method="POST">
+        <h3>Add Category</h3>
+        <label for="name">Category Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br>
+        <button type="submit" name="add_category">Add Category</button>
+    </form>
+
+    <!-- List to View and Delete Categories -->
+    <h3>Categories</h3>
+    <div id="categories_list">
+        {% for category in categories %}
+            <div class="category" onclick="viewCategory({{ category.id }})">
+                <div class="category-details">
+                    <span class="category-name">{{ category.name }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function viewCategory(categoryId) {
+            window.location.href = `/category/${categoryId}`;
+        }
+    </script>
+{% endblock %}

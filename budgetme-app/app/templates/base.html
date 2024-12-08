@@ -4,13 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
 </head>
 <body>
     <header>
         <h1>Budget App</h1>
+        <button class="menu-btn" onclick="toggleMenu()">☰ Menu</button>
     </header>
+    <nav id="side-nav" class="side-nav">
+        <a href="javascript:void(0)" class="close-btn" onclick="toggleMenu()">×</a>
+        <a href="{{ url_for('main.home') }}">Home</a>
+        <a href="{{ url_for('main.manage_budgets') }}">Manage Budgets</a>
+        <a href="{{ url_for('main.manage_transactions') }}">Manage Transactions</a>
+        <a href="{{ url_for('main.manage_categories') }}">Manage Categories</a>
+        <a href="{{ url_for('main.settings') }}">Settings</a>
+    </nav>
     <main>
         {% block content %}{% endblock %}
     </main>
+    <script>
+        function toggleMenu() {
+            const sideNav = document.getElementById('side-nav');
+            if (sideNav.style.width === '250px') {
+                sideNav.style.width = '0';
+            } else {
+                sideNav.style.width = '250px';
+            }
+        }
+    </script>
 </body>
 </html>
