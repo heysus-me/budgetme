@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Transaction Details</h2>
+    <div class="transaction-details">
+        <div><strong>Description:</strong> {{ transaction.description }}</div>
+        <div><strong>Amount:</strong> ${{ transaction.amount }}</div>
+        <div><strong>Type:</strong> {{ transaction.type }}</div>
+        <div><strong>Budget:</strong> {{ transaction.budget.name }}</div>
+        <div><strong>Category:</strong> {{ transaction.category.name if transaction.category else 'N/A' }}</div>
+    </div>
+    <a href="{{ url_for('main.manage_transactions') }}">Back to Transactions</a>
+{% endblock %}
