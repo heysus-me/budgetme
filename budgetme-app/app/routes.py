@@ -1,8 +1,10 @@
 # app/routes.py
+
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from . import db
 from .models import Budget, Transaction, Category, Settings, UserOptions
 from datetime import datetime
+
 
 bp = Blueprint('main', __name__)
 
