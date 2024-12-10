@@ -201,7 +201,13 @@ def update_transaction(transaction_id):
 
 @bp.route('/api/expenses')
 def get_expenses():
-    expenses = Transaction.query.filter_by(type='expense').all()
+    budget_id = request.args.get('budget_id')
+    
+    if budget_id:
+        expenses = Transaction.query.filter_by(type='expense', budget_id=budget_id).all()
+    else:
+        expenses = Transaction.query.filter_by(type='expense').all()
+    
     category_totals = {}
 
     for expense in expenses:

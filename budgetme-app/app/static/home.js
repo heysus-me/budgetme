@@ -4,13 +4,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let chart;
 
     budgetSelect.addEventListener('change', function() {
-        const selectedBudgetName = budgetSelect.options[budgetSelect.selectedIndex].text;
-        updatePieChart(selectedBudgetName);
+        const selectedBudgetId = budgetSelect.value;
+        updatePieChart(selectedBudgetId);
     });
 
-    function updatePieChart(budgetName) {
+    function updatePieChart(budgetId) {
         // Fetch the data for the selected budget
-        const url = budgetName ? `/api/expenses?budget_name=${encodeURIComponent(budgetName)}` : '/api/expenses';
+        const url = budgetId ? `/api/expenses?budget_id=${encodeURIComponent(budgetId)}` : '/api/expenses';
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (elements.length > 0) {
                                 const chartElement = elements[0];
                                 const category = chart.data.labels[chartElement.index];
-                                loadTransactions(category);
+                                loadTransactions(category, budgetId);
                             }
                         }
                     },
@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize the chart with the first budget
     if (budgetSelect.value) {
-        const initialBudgetName = budgetSelect.options[budgetSelect.selectedIndex].text;
-        updatePieChart(initialBudgetName);
+        const initialBudgetId = budgetSelect.value;
+        updatePieChart(initialBudgetId);
     }
 });
 
@@ -75,8 +75,8 @@ function generateColors(length) {
     return colors;
 }
 
-function loadTransactions(category) {
-    fetch(`/api/transactions?category=${encodeURIComponent(category)}`)
+function loadTransactions(category, budgetId) {
+    fetch(`/api/transactions?category=${encodeURIComponent(category)}&budget_id=${encodeURIComponent(budgetId)}`)
         .then(response => response.json())
         .then(transactions => {
             const container = document.getElementById('transactionsContainer');
