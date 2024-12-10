@@ -1,10 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Budgets</h2>
-    <ul>
+
+<div>
+    <label for="budgetSelect">Choose a budget:</label>
+    <select id="budgetSelect">
         {% for budget in budgets %}
-            <li>{{ budget.name }}: ${{ budget.amount }}</li>
+            <option value="{{ budget.id }}">{{ budget.name }}</option>
         {% endfor %}
-    </ul>
+    </select>
+</div>
+
+<div>
+    <canvas id="expensesPieChart" width="400" height="400"></canvas>
+</div>
+
+<div id="transactionsContainer"></div>
+
+<script src="/static/home.js" defer></script>
 {% endblock %}

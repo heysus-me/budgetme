@@ -99,8 +99,8 @@ def manage_transactions():
     transactions = Transaction.query.filter_by(budget_id=default_budget_id).all() if default_budget_id else []
     return render_template('manage_transactions.html', budgets=budgets, categories=categories, transactions=transactions, default_budget_id=default_budget_id)
 
-@bp.route('/get_transactions/<int:budget_id>')
-def get_transactions(budget_id):
+@bp.route('/get_all_transactions/<int:budget_id>')
+def get_all_transactions(budget_id):
     transactions = Transaction.query.filter_by(budget_id=budget_id).all()
     transactions_data = [
         {
@@ -180,3 +180,70 @@ def settings():
         return redirect(url_for('main.settings'))
 
     return render_template('settings.html', budgets=budgets, settings=settings)
+
+
+#### API Endpoints Routes####
+@bp.route('/update_transaction/<int:transaction_id>', methods=['GET', 'POST'])
+def update_transaction(transaction_id):
+    transaction = Transaction.query.get_or_404(transaction_id)
+    if request.method == 'POST':
+        transaction.description = request.form['description']
+        transaction.amount = float(request.form['amount'])
+        transaction.type = request.form['type']
+        transaction.budget_id = int(request.form['budget_id'])
+        transaction.category_id = int(request.form['category_id']) if request.form['category_id'] else None
+        db.session.commit()
+        return redirect(url_for('main.view_transaction', transaction_id=transaction.id))
+
+    budgets = Budget.query.all()
+    categories = Category.query.all()
+    return render_template('update_transaction.html', transaction=transaction, budgets=budgets, categories=categories)
+
+@bp.route('/api/expenses')
+def get_expenses():
+    budget_id = request.args.get('budget_id')
+    
+    if budget_id:
+        expenses = Transaction.query.filter_by(type='expense', budget_id=budget_id).all()
+    else:
+        expenses = Transaction.query.filter_by(type='expense').all()
+    
+    category_totals = {}
+
+    for expense in expenses:
+        category = expense.category.name if expense.category else 'Uncategorized'
+        if category in category_totals:
+            category_totals[category] += expense.amount
+        else:
+            category_totals[category] = expense.amount
+
+    expenses_data = [{'category': category, 'amount': amount} for category, amount in category_totals.items()]
+    return jsonify(expenses_data)
+
+@bp.route('/api/transactions')
+def get_transactions():
+    category_name = request.args.get('category')
+    if category_name == 'Uncategorized':
+        transactions = Transaction.query.filter_by(type='expense', category_id=None).all()
+    else:
+        transactions = Transaction.query.join(Category).filter(Transaction.type == 'expense', Category.name == category_name).all()
+
+    transactions_data = [
+        {
+            'id': transaction.id,
+            'type': transaction.type,
+            'category': transaction.category.name if transaction.category else 'Uncategorized',
+            'amount': transaction.amount,
+            'description': transaction.description,
+            'date': transaction.date.strftime('%Y-%m-%d')
+        }
+        for transaction in transactions
+    ]
+    return jsonify(transactions_data)
+
+@bp.route('/api/transactions/<int:transaction_id>', methods=['DELETE'])
+def delete_transaction(transaction_id):
+    transaction = Transaction.query.get_or_404(transaction_id)
+    db.session.delete(transaction)
+    db.session.commit()
+    return jsonify({'message': 'Transaction deleted successfully'})

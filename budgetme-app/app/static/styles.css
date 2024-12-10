@@ -210,3 +210,103 @@ form button:hover {
         justify-content: flex-end;
     }
 }
+
+/* Home Page Styles */
+#transactionsContainer {
+    margin-top: 20px; /* Adjust the value as needed */
+}
+.transaction-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    background-color: #ffffff;
+}
+
+.transaction-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.transaction-date-amount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transaction-date {
+    font-size: 0.9em;
+    color: #757575;
+}
+
+.transaction-amount {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333333;
+}
+
+.transaction-description {
+    margin-top: 8px;
+    font-size: 1em;
+    color: #424242;
+    word-wrap: break-word; /* Allow the description to wrap */
+}
+
+.text-danger {
+    color: #e53935 !important;
+}
+
+.text-success {
+    color: #43a047 !important;
+}
+
+/*  Page Styles */
+/* General Button Styles */
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+/* Specific Button Styles */
+.btn-danger {
+    background-color: #e53935;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+}
+
+.btn-primary {
+    background-color: #1e88e5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1976d2;
+}
+
+.btn-secondary {
+    background-color: #757575;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #616161;
+}
+
+/* Button Group Styles */
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
