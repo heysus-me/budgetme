@@ -1,151 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<div>
+    <label for="budgetSelect">Choose a budget:</label>
+    <select id="budgetSelect">
+        {% for budget in budgets %}
+            <option value="{{ budget.id }}">{{ budget.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
 <div>
     <canvas id="expensesPieChart" width="400" height="400"></canvas>
 </div>
+
 <div id="transactionsContainer"></div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('/api/expenses')
-            .then(response => response.json())
-            .then(data => {
-                const processedData = processExpensesData(data);
-                renderPieChart(processedData);
-            });
-    });
-
-    function processExpensesData(data) {
-        const categoryTotals = {};
-
-        data.forEach(expense => {
-            if (categoryTotals[expense.category]) {
-                categoryTotals[expense.category] += expense.amount;
-            } else {
-                categoryTotals[expense.category] = expense.amount;
-            }
-        });
-
-        // Convert the categoryTotals object to an array of [category, amount] pairs
-        const categoryArray = Object.entries(categoryTotals);
-
-        // Sort the array by amount in descending order
-        categoryArray.sort((a, b) => b[1] - a[1]);
-
-        // Separate the categories and amounts
-        const categories = categoryArray.map(item => item[0]);
-        const amounts = categoryArray.map(item => item[1]);
-
-        // Select the top 5 categories for the legend
-        const topCategories = categoryArray.slice(0, 5).map(item => item[0]);
-
-        return { categories, amounts, topCategories };
-    }
-
-    function generateColors(numColors) {
-        const colors = [];
-        for (let i = 0; i < numColors; i++) {
-            const hue = i * (360 / numColors);
-            colors.push(`hsl(${hue}, 100%, 50%)`);
-        }
-        return colors;
-    }
-
-    function renderPieChart(data) {
-        const ctx = document.getElementById('expensesPieChart').getContext('2d');
-        const { categories, amounts, topCategories } = data;
-        const colors = generateColors(categories.length);
-
-        const chart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: categories,
-                datasets: [{
-                    label: 'Expenses',
-                    data: amounts,
-                    backgroundColor: colors,
-                    borderColor: colors.map(color => color.replace('50%', '40%')),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            generateLabels: (chart) => {
-                                const data = chart.data;
-                                if (data.labels.length && data.datasets.length) {
-                                    const dataset = data.datasets[0];
-                                    const total = dataset.data.reduce((sum, current) => sum + current, 0);
-                                    return data.labels.map((label, i) => {
-                                        if (topCategories.includes(label)) {
-                                            const value = dataset.data[i];
-                                            const percentage = (value / total * 100).toFixed(2);
-                                            return {
-                                                text: `${label}: $${value} (${percentage}%)`,
-                                                fillStyle: dataset.backgroundColor[i],
-                                                hidden: isNaN(dataset.data[i]) || dataset.data[i] <= 0,
-                                                index: i
-                                            };
-                                        }
-                                        return null;
-                                    }).filter(item => item !== null);
-                                }
-                                return [];
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Top 5 Expenses by Category'
-                    }
-                },
-                onClick: (event, elements) => {
-                    if (elements.length > 0) {
-                        const chartElement = elements[0];
-                        const category = chart.data.labels[chartElement.index];
-                        loadTransactions(category);
-                    }
-                }
-            }
-        });
-    }
-
-    function loadTransactions(category) {
-        console.log(`Loading transactions for category: ${category}`); // Debugging log
-        fetch(`/api/transactions?category=${encodeURIComponent(category)}`)
-            .then(response => response.json())
-            .then(transactions => {
-                console.log('Transactions:', transactions); // Debugging log
-                const container = document.getElementById('transactionsContainer');
-                container.innerHTML = '';
-
-                transactions.forEach(transaction => {
-                    console.log('Transaction ID:', transaction.id); // Debugging log
-                    const transactionDiv = document.createElement('div');
-                    transactionDiv.classList.add('transaction');
-                    transactionDiv.setAttribute('onclick', `viewTransaction(${transaction.id})`);
-                    transactionDiv.innerHTML = `
-                        <div class="transaction-details">
-                            <span class="transaction-id">${transaction.id}</span>
-                            <span class="transaction-type">${transaction.type}</span>
-                            <span class="transaction-category">${transaction.category}</span>
-                            <span class="transaction-amount">$${transaction.amount}</span>
-                            <span class="transaction-description">${transaction.description}</span>
-                            <span class="transaction-date">${transaction.date}</span>
-                        </div>
-                    `;
-                    container.appendChild(transactionDiv);
-                });
-            })
-            .catch(error => console.error('Error loading transactions:', error)); // Debugging log
-    }
-
-    function viewTransaction(transactionId) {
-        window.location.href = `/transaction/${transactionId}`;
-    }
-</script>
+<script src="/static/home.js" defer></script>
 {% endblock %}

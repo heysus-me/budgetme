@@ -10,8 +10,11 @@
         <div><strong>Category:</strong> {{ transaction.category.name if transaction.category else 'N/A' }}</div>
         <div><strong>ID:</strong> {{ transaction.id }}</div>
     </div>
-    <button type="button" onclick="confirmDelete({{ transaction.id }})">Delete Transaction</button>
-    <a href="{{ url_for('main.manage_transactions') }}">Back to Transactions</a>
+    <div class="button-group">
+        <button type="button" class="btn btn-danger" onclick="confirmDelete({{ transaction.id }})">Delete Transaction</button>
+        <button type="button" class="btn btn-primary" onclick="window.location.href='{{ url_for('main.update_transaction', transaction_id=transaction.id) }}'">Update Transaction</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('main.home') }}'">Home</button>
+    </div>
 
     <script>
         function confirmDelete(transactionId) {
@@ -22,7 +25,7 @@
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
-                    window.location.href = "{{ url_for('main.manage_transactions') }}";
+                    window.location.href = "{{ url_for('main.home') }}";
                 })
                 .catch(error => console.error('Error:', error));
             }

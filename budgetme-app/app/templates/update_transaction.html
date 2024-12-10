@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Update Transaction</h2>
+    <form method="POST">
+        <div>
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" value="{{ transaction.description }}" required>
+        </div>
+        <div>
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" value="{{ transaction.amount }}" step="0.01" required>
+        </div>
+        <div>
+            <label for="type">Type:</label>
+            <select id="type" name="type" required>
+                <option value="expense" {% if transaction.type == 'expense' %}selected{% endif %}>Expense</option>
+                <option value="income" {% if transaction.type == 'income' %}selected{% endif %}>Income</option>
+            </select>
+        </div>
+        <div>
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" value="{{ transaction.date.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <div>
+            <label for="budget_id">Budget:</label>
+            <select id="budget_id" name="budget_id" required>
+                {% for budget in budgets %}
+                    <option value="{{ budget.id }}" {% if transaction.budget_id == budget.id %}selected{% endif %}>{{ budget.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="category_id">Category:</label>
+            <select id="category_id" name="category_id">
+                <option value="">None</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if transaction.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit">Update Transaction</button>
+    </form>
+    <button type="button" onclick="window.location.href = '{{ url_for('main.view_transaction', transaction_id=transaction.id) }}'">Cancel</button>
+{% endblock %}

@@ -183,6 +183,22 @@ def settings():
 
 
 #### API Endpoints Routes####
+@bp.route('/update_transaction/<int:transaction_id>', methods=['GET', 'POST'])
+def update_transaction(transaction_id):
+    transaction = Transaction.query.get_or_404(transaction_id)
+    if request.method == 'POST':
+        transaction.description = request.form['description']
+        transaction.amount = float(request.form['amount'])
+        transaction.type = request.form['type']
+        transaction.budget_id = int(request.form['budget_id'])
+        transaction.category_id = int(request.form['category_id']) if request.form['category_id'] else None
+        db.session.commit()
+        return redirect(url_for('main.view_transaction', transaction_id=transaction.id))
+
+    budgets = Budget.query.all()
+    categories = Category.query.all()
+    return render_template('update_transaction.html', transaction=transaction, budgets=budgets, categories=categories)
+
 @bp.route('/api/expenses')
 def get_expenses():
     expenses = Transaction.query.filter_by(type='expense').all()
