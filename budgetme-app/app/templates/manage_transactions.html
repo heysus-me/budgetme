@@ -82,7 +82,7 @@
             transactionsList.innerHTML = '';
 
             if (budgetId) {
-                fetch(`/get_transactions/${budgetId}`)
+                fetch(`/get_all_transactions/${budgetId}`)
                     .then(response => response.json())
                     .then(transactions => {
                         transactions.forEach(transaction => {

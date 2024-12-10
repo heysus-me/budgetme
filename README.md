@@ -25,10 +25,10 @@
 ---
 
 ### **2. Frontend Design**
-- [ ] Learn basic **HTML**, **CSS**, and **Jinja2 templating**.
-- [ ] Design **basic UI** for tracking income and expenses.
-- [ ] Implement **Bootstrap** for responsive design.
-- [ ] Create a simple homepage with form inputs for transactions.
+- [x] Learn basic **HTML**, **CSS**, and **Jinja2 templating**.
+- [x] Design **basic UI** for tracking income and expenses.
+- [x] Implement **Bootstrap** for responsive design.
+- [x] Create a simple homepage with form inputs for transactions.
 - [ ] Develop budget overview page with transaction summary.
 
 **Estimated Completion Date:** [12/31/2025]
