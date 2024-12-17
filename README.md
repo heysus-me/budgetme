@@ -95,3 +95,9 @@
 - [ ] Set up Flask environment.
 - [ ] Designed basic UI and integrated Bootstrap.
 - [ ] Implemented user authentication with JWT.
+
+
+
+
+## **IDEAS NOTES**
+- [ ] While adding transactions, have a way to add new categories on the fly
