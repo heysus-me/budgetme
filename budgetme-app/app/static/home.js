@@ -2,9 +2,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const budgetSelect = document.getElementById('budgetSelect');
     const expensesPieChart = document.getElementById('expensesPieChart').getContext('2d');
     let chart;
+    let selectedBudgetId = null;
+    let selectedTransactionId = null;
 
     budgetSelect.addEventListener('change', function() {
-        const selectedBudgetId = budgetSelect.value;
+        const selectedOption = budgetSelect.options[budgetSelect.selectedIndex];
+        selectedBudgetId = selectedOption.value;
         updatePieChart(selectedBudgetId);
     });
 
@@ -41,9 +44,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                 display: true,
                                 text: 'Expenses by Category'
                             },
-                            // Disable the datalabels plugin
                             datalabels: {
-                                display: false
+                                display: true,
+                                formatter: (value, context) => {
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = (value / total * 100).toFixed(2) + '%';
+                                    return percentage;
+                                },
+                                color: '#fff',
+                                backgroundColor: '#000',
+                                borderRadius: 3,
+                                font: {
+                                    weight: 'bold'
+                                },
+                                anchor: 'end',
+                                align: 'end',
+                                offset: 10
                             }
                         },
                         onClick: (event, elements) => {
@@ -54,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     },
-                    plugins: [] // Ensure the datalabels plugin is not included
+                    plugins: [ChartDataLabels] // Include the datalabels plugin
                 });
             });
     }
@@ -75,7 +91,6 @@ function generateColors(length) {
     return colors;
 }
 
-// Load transactions for the selected category
 function loadTransactions(category, budgetId) {
     fetch(`/api/transactions?category=${encodeURIComponent(category)}&budget_id=${encodeURIComponent(budgetId)}`)
         .then(response => response.json())
@@ -114,7 +129,7 @@ function loadTransactions(category, budgetId) {
                 transactionDiv.appendChild(descriptionDiv);
 
                 transactionDiv.addEventListener('click', () => {
-                    window.location.href = `/transaction/${transaction.id}`;
+                    showTransactionDetails(transaction);
                 });
 
                 container.appendChild(transactionDiv);
@@ -122,27 +137,71 @@ function loadTransactions(category, budgetId) {
         });
 }
 
-// Modal functionality
-function openModal() {
-    document.getElementById('transactionModal').style.display = 'block';
+// Modal functionality for adding transactions
+function openAddTransactionModal() {
+    document.getElementById('addTransactionModal').style.display = 'block';
 }
 
-function closeModal() {
-    document.getElementById('transactionModal').style.display = 'none';
+function closeAddTransactionModal() {
+    document.getElementById('addTransactionModal').style.display = 'none';
 }
 
-// Handle form submission
+// Modal functionality for transaction details
+function showTransactionDetails(transaction) {
+    selectedTransactionId = transaction.id;
+    fetch(`/api/transaction/${transaction.id}`)
+        .then(response => response.json())
+        .then(data => {
+            const transactionDetails = document.getElementById('transactionDetails');
+            transactionDetails.innerHTML = `
+                <p><strong>Description:</strong> ${data.description}</p>
+                <p><strong>Amount:</strong> $${data.amount}</p>
+                <p><strong>Type:</strong> ${data.type}</p>
+                <p><strong>Date:</strong> ${data.date}</p>
+                <p><strong>Budget:</strong> ${data.budget_name}</p>
+                <p><strong>Category:</strong> ${data.category_name}</p>
+            `;
+            document.getElementById('transactionDetailsModal').style.display = 'block';
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function closeTransactionDetailsModal() {
+    document.getElementById('transactionDetailsModal').style.display = 'none';
+}
+
+function editTransaction() {
+    // Implement edit functionality
+    alert('Edit functionality to be implemented');
+}
+
+function deleteTransaction() {
+    if (confirm('Are you sure you want to delete this transaction?')) {
+        fetch(`/api/transactions/${selectedTransactionId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Transaction deleted successfully');
+            closeTransactionDetailsModal();
+            // Optionally, refresh the transactions list or pie chart
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+// Handle form submission for adding transactions
 document.getElementById('transactionForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    fetch('/api/add_transaction', {
+    fetch('/api/transactions', {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         alert('Transaction added successfully');
-        closeModal();
+        closeAddTransactionModal();
         // Optionally, refresh the transactions list or pie chart
     })
     .catch(error => console.error('Error:', error));
