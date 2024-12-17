@@ -1,0 +1,15 @@
+/* Responsive styles */
+@media (max-width: 768px) {
+    .menu-btn {
+        font-size: 18px;
+        padding: 8px;
+    }
+
+    form input, form select, form button {
+        width: 100%;
+    }
+
+    .transaction-details, .budget-details, .category-details {
+        margin-bottom: 10px;
+    }
+}
