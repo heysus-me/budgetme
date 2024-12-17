@@ -75,6 +75,7 @@ function generateColors(length) {
     return colors;
 }
 
+// Load transactions for the selected category
 function loadTransactions(category, budgetId) {
     fetch(`/api/transactions?category=${encodeURIComponent(category)}&budget_id=${encodeURIComponent(budgetId)}`)
         .then(response => response.json())
@@ -120,3 +121,29 @@ function loadTransactions(category, budgetId) {
             });
         });
 }
+
+// Modal functionality
+function openModal() {
+    document.getElementById('transactionModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('transactionModal').style.display = 'none';
+}
+
+// Handle form submission
+document.getElementById('transactionForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    fetch('/api/add_transaction', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Transaction added successfully');
+        closeModal();
+        // Optionally, refresh the transactions list or pie chart
+    })
+    .catch(error => console.error('Error:', error));
+});

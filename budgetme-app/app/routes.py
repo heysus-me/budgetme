@@ -10,8 +10,10 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def home():
-    budgets = Budget.query.all()
-    return render_template('home.html', budgets=budgets)
+    budgets = Budget.query.all()  # Fetch all budgets from the database
+    categories = Category.query.all()  # Fetch all categories from the database
+    today_date = datetime.now().date()
+    return render_template('home.html', budgets=budgets, categories=categories, today_date=today_date)
 
 @bp.route('/manage_budgets', methods=['GET', 'POST'])
 def manage_budgets():
@@ -247,3 +249,34 @@ def delete_transaction(transaction_id):
     db.session.delete(transaction)
     db.session.commit()
     return jsonify({'message': 'Transaction deleted successfully'})
+
+@bp.route('/api/add_transaction', methods=['POST'])
+def add_transaction():
+    description = request.form['description']
+    amount = float(request.form['amount'])
+    type = request.form['type']
+    date_str = request.form['date']
+    date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else datetime.utcnow().date()
+    budget_id = int(request.form['budget_id'])
+    category_id = int(request.form['category_id']) if request.form['category_id'] else None
+
+    new_transaction = Transaction(
+        description=description,
+        amount=amount,
+        type=type,
+        date=date,
+        budget_id=budget_id,
+        category_id=category_id
+    )
+    db.session.add(new_transaction)
+    db.session.commit()
+
+    return jsonify({'message': 'Transaction added successfully', 'transaction': {
+        'id': new_transaction.id,
+        'description': new_transaction.description,
+        'amount': new_transaction.amount,
+        'type': new_transaction.type,
+        'date': new_transaction.date.strftime('%Y-%m-%d'),
+        'budget_id': new_transaction.budget_id,
+        'category_id': new_transaction.category_id
+    }})
