@@ -255,26 +255,20 @@ function loadTransactions(category, budgetId) {
                 transactionDiv.appendChild(descriptionDiv);
 
                 transactionDiv.addEventListener('click', () => {
-                    showTransactionDetails(transaction);
+                    openTransactionDetailsModal(transaction);
                 });
 
                 container.appendChild(transactionDiv);
             });
         });
 }
-
 // Modal functionality for adding transactions
 function openAddTransactionModal() {
     document.getElementById('addTransactionModal').style.display = 'block';
 }
 
-function closeAddTransactionModal() {
-    document.getElementById('addTransactionModal').style.display = 'none';
-    
-}
-
 // Modal functionality for transaction details
-function showTransactionDetails(transaction) {
+function openTransactionDetailsModal(transaction) {
     selectedTransactionId = transaction.id;
     fetch(`/api/transaction/${transaction.id}`)
         .then(response => response.json())
@@ -295,4 +289,40 @@ function showTransactionDetails(transaction) {
 
 function closeTransactionDetailsModal() {
     document.getElementById('transactionDetailsModal').style.display = 'none';
+}
+
+// Modal functionality for editing transactions
+function openEditTransactionModal() {
+    closeTransactionDetailsModal();
+    fetch(`/api/transaction/${selectedTransactionId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('editDescription').value = data.description;
+            document.getElementById('editAmount').value = data.amount;
+            document.getElementById('editType').value = data.type;
+            document.getElementById('editDate').value = data.date;
+            document.getElementById('editBudgetId').value = data.budget_id;
+            document.getElementById('editCategoryId').value = data.category_id;
+            document.getElementById('editTransactionModal').style.display = 'block';
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function editTransaction() {
+    const formData = new FormData(document.getElementById('editTransactionForm'));
+    fetch(`/api/transactions/${selectedTransactionId}`, {
+        method: 'PUT',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Transaction updated successfully');
+        closeEditTransactionModal();
+        openTransactionDetails();
+        // Optionally, refresh the transactions list or pie chart
+    })
+    .catch(error => console.error('Error:', error));
+}
+function closeEditTransactionModal() {
+    document.getElementById('editTransactionModal').style.display = 'none';
 }
