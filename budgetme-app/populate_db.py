@@ -12,20 +12,19 @@ app.app_context().push()
 fake = Faker()
 
 # Create a user
-user = User(username='testuser', email='testuser@example.com')
-db.session.add(user)
-db.session.commit()
+# user = User(username='testuser', email='testuser@example.com')
+# db.session.add(user)
+# db.session.commit()
 
 # Create budgets
 budgets = []
-for _ in range(5):
-    budget = Budget(
-        name=fake.word(),
-        amount=round(random.uniform(1000, 5000), 2),
-        user_id=user.id
-    )
-    budgets.append(budget)
-    db.session.add(budget)
+# Create a budget
+budget = Budget(
+    name='Monthly Budget2',
+    start_balance=round(random.uniform(1000, 5000), 2),
+    user_id=0
+)
+db.session.add(budget)
 db.session.commit()
 
 # Create categories
@@ -36,17 +35,19 @@ for _ in range(10):
     db.session.add(category)
 db.session.commit()
 
-# Create transactions
-for _ in range(100):
-    transaction = Transaction(
-        description=fake.sentence(),
-        amount=round(random.uniform(10, 500), 2),
-        type=random.choice(['income', 'expense']),
-        date=fake.date_between(start_date='-1y', end_date='today'),
-        budget_id=random.choice(budgets).id,
-        category_id=random.choice(categories).id
-    )
-    db.session.add(transaction)
+# Create transactions for each category
+for category in categories:
+    num_transactions = random.randint(5, 10)
+    for _ in range(num_transactions):
+        transaction = Transaction(
+            description=fake.sentence(),
+            amount=round(random.uniform(10, 500), 2),
+            type=random.choice(['income', 'expense']),
+            budget_id=budget.id,
+            date=fake.date_time_this_year(),
+            category_id=category.id
+        )
+        db.session.add(transaction)
 db.session.commit()
 
 print("Database populated with 100 transactions.")

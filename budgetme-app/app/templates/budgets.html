@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+
+<script src="{{ url_for('static', filename='budgets.js') }}" defer></script>
+
+
+<button type="button" class="btn btn-primary" onclick="openNewBudgetModal()">New Budget</button>
+{% for budget in budgets %}
+
+<div class="budget">
+    <div class="budget-details">
+        <h2>{{ budget.name }}</h2>
+    </div>
+    <div class="budget-actions">
+        <button type="button" class="btn btn-secondary" onclick="editBudget({{ budget.id }})">Edit</button>
+        <button type="button" class="btn btn-danger" onclick="deleteBudget({{ budget.id }})">Delete</button>
+    </div>
+</div>
+{% endfor %}
+
+<!-- The Add Budget Modal -->
+<div id="addBudgetModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeNewBudgetModal()">&times;</span>
+        <h2>Add Budget</h2>
+        <form id="budgetForm">
+            <div class="form-group">
+                <label for="budgetUser">User int</label> <!-- TODO: Chagne it, currently hardcodes a user-->
+                <input type="number" class="form-control" id="budgetUser" name="user_id" required>
+            </div>
+            <div class="form-group">
+                <label for="budgetName">Name</label>
+                <input type="text" class="form-control" id="budgetName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="budgetAmount">Starting balance</label>
+                <input type="number" step="0.01" class="form-control" id="budgetAmount" name="start_balance" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Budget</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

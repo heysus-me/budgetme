@@ -4,11 +4,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let chart;
     let selectedBudgetId = null;
     let selectedTransactionId = null;
+    const balanceBarChart = initializeBalanceBarChart();
 
     budgetSelect.addEventListener('change', function() {
         const selectedOption = budgetSelect.options[budgetSelect.selectedIndex];
         selectedBudgetId = selectedOption.value;
         updatePieChart(selectedBudgetId);
+        fetchBudgetData(selectedBudgetId);
     });
 
     function updatePieChart(budgetId) {
@@ -75,97 +77,134 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Initialize the chart with the first budget
+    // Initialize the chart with the first budget if available
     if (budgetSelect.value) {
         const initialBudgetId = budgetSelect.value;
         updatePieChart(initialBudgetId);
+        fetchBudgetData(initialBudgetId);
     }
 
-    // Data for the balance bar chart
-    const balanceData = {
-        labels: ['Start Balance', 'End Balance'],
-        datasets: [{
-            label: 'Balance',
-            data: [1000, 800], // Replace with actual start and end balance values
-            backgroundColor: ['#9e9e9e', '#f44336'], // Neutral color for start balance, red for end balance
-            borderColor: ['#757575', '#d32f2f'], // Neutral border color for start balance, darker red for end balance
-            borderWidth: 1,
-            borderRadius: 5,
-            barThickness: 15, // Adjusted bar thickness
-            maxBarThickness: 15 // Maximum bar thickness
-        }]
-    };
+    function initializeBalanceBarChart() {
+        const balanceData = {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                label: 'Balance',
+                data: [0, 0], // Initial data
+                backgroundColor: ['#4caf50', '#f44336'], // Green for income, red for expenses
+                borderColor: ['#388e3c', '#d32f2f'], // Darker green for income, darker red for expenses
+                borderWidth: 1,
+                borderRadius: 5,
+                barThickness: 15, // Adjusted bar thickness
+                maxBarThickness: 15 // Maximum bar thickness
+            }]
+        };
 
-    // Configuration for the balance bar chart
-    const balanceConfig = {
-        type: 'bar',
-        data: balanceData,
-        options: {
-            indexAxis: 'y',
-            layout: {
-                padding: {
-                    top: 0,
-                    bottom: 0
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: {
-                        display: false
+        const balanceConfig = {
+            type: 'bar',
+            data: balanceData,
+            options: {
+                indexAxis: 'y',
+                layout: {
+                    padding: {
+                        top: 0,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 14
+                            }
+                        }
                     },
-                    ticks: {
-                        font: {
-                            size: 14
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 14
+                            }
                         }
                     }
                 },
-                y: {
-                    grid: {
+                plugins: {
+                    legend: {
                         display: false
                     },
-                    ticks: {
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        titleFont: {
+                            size: 16
+                        },
+                        bodyFont: {
+                            size: 14
+                        },
+                        cornerRadius: 5
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'start',
+                        offset: 10,
+                        color: '#000',
                         font: {
                             size: 14
+                        },
+                        formatter: function(value) {
+                            return '$' + value;
                         }
                     }
                 }
             },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    titleFont: {
-                        size: 16
-                    },
-                    bodyFont: {
-                        size: 14
-                    },
-                    cornerRadius: 5
-                },
-                datalabels: {
-                    anchor: 'end',
-                    align: 'start',
-                    offset: 10,
-                    color: '#000',
-                    font: {
-                        size: 14
-                    },
-                    formatter: function(value) {
-                        return '$' + value;
-                    }
-                }
-            }
-        },
-        plugins: [ChartDataLabels]
-    };
-    // Render the balance bar chart
-    const balanceBarChart = new Chart(
-        document.getElementById('balanceBarChart'),
-        balanceConfig
-    );
+            plugins: [ChartDataLabels]
+        };
+
+        return new Chart(document.getElementById('balanceBarChart'), balanceConfig);
+    }
+
+    function fetchBudgetData(budgetId) {
+        fetch(`/api/budgets/${budgetId}`)
+            .then(response => response.json())
+            .then(data => {
+                updateBalanceBarChart(data.income, data.expenses);
+                updateBalanceInfo(data.start_balance, data.end_balance);
+            })
+            .catch(error => console.error('Error fetching budget data:', error));
+    }
+
+    function updateBalanceBarChart(startBalance, endBalance) {
+        const balanceBarChart = Chart.getChart('balanceBarChart');
+        balanceBarChart.data.datasets[0].data = [startBalance, endBalance];
+        balanceBarChart.update();
+    }
+
+    function updateBalanceInfo(startBalance, endBalance) {
+        document.getElementById('startBalance').textContent = `$${startBalance.toFixed(2)}`;
+        document.getElementById('currentBalance').textContent = `$${endBalance.toFixed(2)}`;
+    }
+
+    // Handle form submission for adding transactions
+    document.getElementById('transactionForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        fetch('/api/transactions', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Transaction added successfully');
+            closeAddTransactionModal();
+            // Optionally, refresh the transactions list or update the charts
+            fetchBudgetData(selectedBudgetId);
+        })
+        .catch(error => console.error('Error:', error));
+    });
 });
 
 function generateColors(length) {
@@ -230,6 +269,7 @@ function openAddTransactionModal() {
 
 function closeAddTransactionModal() {
     document.getElementById('addTransactionModal').style.display = 'none';
+    
 }
 
 // Modal functionality for transaction details
@@ -255,40 +295,3 @@ function showTransactionDetails(transaction) {
 function closeTransactionDetailsModal() {
     document.getElementById('transactionDetailsModal').style.display = 'none';
 }
-
-function editTransaction() {
-    // Implement edit functionality
-    alert('Edit functionality to be implemented');
-}
-
-function deleteTransaction() {
-    if (confirm('Are you sure you want to delete this transaction?')) {
-        fetch(`/api/transactions/${selectedTransactionId}`, {
-            method: 'DELETE'
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert('Transaction deleted successfully');
-            closeTransactionDetailsModal();
-            // Optionally, refresh the transactions list or pie chart
-        })
-        .catch(error => console.error('Error:', error));
-    }
-}
-
-// Handle form submission for adding transactions
-document.getElementById('transactionForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    fetch('/api/transactions', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert('Transaction added successfully');
-        closeAddTransactionModal();
-        // Optionally, refresh the transactions list or pie chart
-    })
-    .catch(error => console.error('Error:', error));
-});

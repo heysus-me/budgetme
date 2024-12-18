@@ -1,21 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <script src="/static/home.js" defer></script>
 
 <div class="budget-selection">
     <label for="budgetSelect">Select a Budget:</label>
     <select id="budgetSelect" class="form-control">
         {% for budget in budgets %}
-            <option value="{{ budget.id }}">{{ budget.name }} - ${{ budget.amount }}</option>
+            <option value="{{ budget.id }}">{{ budget.name }}</option>
         {% endfor %}
     </select>
 </div>
 
-<button type="button" class="btn btn-primary" onclick="openAddTransactionModal()">Add Transaction</button>
+<div id="balanceInfo" class="balance-info d-flex justify-content-between mt-3">
+    <div class="balance-item">
+        <h3>Start Balance</h3>
+        <p id="startBalance">$0.00</p>
+    </div>
+    <div class="balance-item">
+        <h3>End Balance</h3>
+        <p id="currentBalance">$0.00</p>
+    </div>
+</div>
+
 <div>
     <canvas id="balanceBarChart" width="400" height="60"></canvas>
 </div>
+
+<button type="button" class="btn btn-primary" onclick="openAddTransactionModal()">Add Transaction</button>
+
 <div>
     <canvas id="expensesPieChart" width="400" height="400"></canvas>
 </div>

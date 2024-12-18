@@ -15,3 +15,10 @@ def home():
         categories=categories,
         today_date=today_date, 
         transactions=transactions)
+
+@main_bp.route('/budgets')
+def budgets():
+    budgets = Budget.query.all()
+    return render_template(
+        'budgets.html',
+        budgets=budgets)

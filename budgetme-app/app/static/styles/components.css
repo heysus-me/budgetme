@@ -47,3 +47,32 @@
 .text-success {
     color: #43a047 !important;
 }
+
+.balance-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.balance-item {
+    flex: 1;
+    text-align: center;
+}
+
+
+/* Budgets Page Styles (budgets.html)*/
+.budget {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.budget-details {
+    flex-grow: 1;
+}
+.budget-actions {
+    display: flex;
+    gap: 10px;
+}

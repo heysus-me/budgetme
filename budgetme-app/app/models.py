@@ -14,10 +14,30 @@ class User(db.Model):
 class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
+    start_balance = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     user = db.relationship('User', backref=db.backref('budgets', lazy=True))
+
+    @property
+    def income(self):
+        return sum(transaction.amount for transaction in self.transactions if transaction.type == 'income')
+
+    @property
+    def expenses(self):
+        return sum(transaction.amount for transaction in self.transactions if transaction.type == 'expense')
+
+    @property
+    def end_balance(self):
+        return self.start_balance + (self.income - self.expenses)
+
+    def __repr__(self):
+        return f'<Budget {self.name}>'
+    @property
+    def end_balance(self):
+        income = sum(transaction.amount for transaction in self.transactions if transaction.type == 'income')
+        expenses = sum(transaction.amount for transaction in self.transactions if transaction.type == 'expense')
+        return self.start_balance + income - expenses
 
     def __repr__(self):
         return f'<Budget {self.name}>'

@@ -61,7 +61,7 @@ def get_transaction(transaction_id):
         'budget_id': transaction.budget_id,
         'budget_name': transaction.budget.name,
         'category_id': transaction.category_id,
-        'category_name': transaction.category.name,
+        'category_name': transaction.category.name if transaction.category else 'Uncategorized',
     }
     return jsonify(transaction_data)
 
@@ -133,7 +133,7 @@ def get_budgets():
         {
             'id': budget.id,
             'name': budget.name,
-            'amount': budget.amount,
+            'amount': budget.start_balance,
             'user_id': budget.user_id
         }
         for budget in budgets
@@ -146,7 +146,10 @@ def get_budget(budget_id):
     budget_data = {
         'id': budget.id,
         'name': budget.name,
-        'amount': budget.amount,
+        'income': budget.income,
+        'expenses': budget.expenses,
+        'start_balance': budget.start_balance,
+        'end_balance': budget.end_balance,
         'user_id': budget.user_id
     }
     return jsonify(budget_data)
@@ -154,17 +157,17 @@ def get_budget(budget_id):
 @api_bp.route('/budgets', methods=['POST'])
 def add_budget():
     name = request.form['name']
-    amount = float(request.form['amount'])
+    start_balance = float(request.form['start_balance'])
     user_id = int(request.form['user_id'])
 
-    new_budget = Budget(name=name, amount=amount, user_id=user_id)
+    new_budget = Budget(name=name, start_balance=start_balance, user_id=user_id)
     db.session.add(new_budget)
     db.session.commit()
 
     return jsonify({'message': 'Budget added successfully', 'budget': {
         'id': new_budget.id,
         'name': new_budget.name,
-        'amount': new_budget.amount,
+        'start_balance': new_budget.start_balance,
         'user_id': new_budget.user_id
     }})
 
@@ -172,14 +175,15 @@ def add_budget():
 def update_budget(budget_id):
     budget = Budget.query.get_or_404(budget_id)
     budget.name = request.form['name']
-    budget.amount = float(request.form['amount'])
+    budget.start_balance = float(request.form['amount'])
     budget.user_id = int(request.form['user_id'])
     db.session.commit()
 
     return jsonify({'message': 'Budget updated successfully', 'budget': {
         'id': budget.id,
         'name': budget.name,
-        'amount': budget.amount,
+        'start_blance': budget.start_balance,
+        'end_blance': budget.end_balance,
         'user_id': budget.user_id
     }})
 
