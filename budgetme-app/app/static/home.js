@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                     weight: 'bold'
                                 },
                                 anchor: 'end',
-                                align: 'end',
-                                offset: 10
+                                align: 'center',
+                                offset: 0
                             }
                         },
                         onClick: (event, elements) => {
@@ -94,8 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderColor: ['#388e3c', '#d32f2f'], // Darker green for income, darker red for expenses
                 borderWidth: 1,
                 borderRadius: 5,
+                minBarThickness: 5,
                 barThickness: 15, // Adjusted bar thickness
-                maxBarThickness: 15 // Maximum bar thickness
+                maxBarThickness: 35 // Maximum bar thickness
             }]
         };
 
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     x: {
                         beginAtZero: true,
                         grid: {
-                            display: false
+                            display: true
                         },
                         ticks: {
                             font: {
@@ -148,15 +149,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         cornerRadius: 5
                     },
                     datalabels: {
-                        anchor: 'end',
-                        align: 'start',
+                        anchor: 'center',
+                        align: 'right',
                         offset: 10,
                         color: '#000',
                         font: {
                             size: 14
                         },
                         formatter: function(value) {
-                            return '$' + value;
+                            return '$' + Math.round(value);
                         }
                     }
                 }

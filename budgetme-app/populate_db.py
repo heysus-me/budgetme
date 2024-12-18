@@ -27,27 +27,48 @@ budget = Budget(
 db.session.add(budget)
 db.session.commit()
 
-# Create categories
+# Create common budget categories
+common_categories = [
+    'Food', 'Utilities', 'Rent', 'Transportation', 'Entertainment',
+    'Healthcare', 'Insurance', 'Savings', 'Debt Payments', 'Miscellaneous', 'Paycheck'
+]
+
 categories = []
-for _ in range(10):
-    category = Category(name=fake.word())
+for category_name in common_categories:
+    category = Category(name=category_name)
     categories.append(category)
     db.session.add(category)
+print(categories)
 db.session.commit()
 
-# Create transactions for each category
-for category in categories:
-    num_transactions = random.randint(5, 10)
-    for _ in range(num_transactions):
-        transaction = Transaction(
-            description=fake.sentence(),
-            amount=round(random.uniform(10, 500), 2),
-            type=random.choice(['income', 'expense']),
-            budget_id=budget.id,
-            date=fake.date_time_this_year(),
-            category_id=category.id
-        )
-        db.session.add(transaction)
+# Create expense transactions for each category, except for Paycheck
+for i in range(50):
+    category = random.choice(categories[:-1])
+    transaction = Transaction(
+        description=fake.sentence(),
+        amount=round(random.uniform(1, 100), 2),
+        type='expense',
+        date=fake.date_time_this_year(),
+        category_id=category.id,
+        budget_id=budget.id
+    )
+    print(transaction)
+    db.session.add(transaction)
 db.session.commit()
+
+# Create income transactions for Paycheck category
+for i in range(3):
+    transaction = Transaction(
+        description=fake.sentence(),
+        amount=round(random.uniform(1000, 3000), 2),
+        type='income',
+        date=fake.date_time_this_year(),
+        category_id=categories[-1].id,
+        budget_id=budget.id
+    )
+    db.session.add(transaction)
+print(transaction)
+db.session.commit()
+
 
 print("Database populated with 100 transactions.")

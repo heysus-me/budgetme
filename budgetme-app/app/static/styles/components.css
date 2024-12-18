@@ -58,6 +58,22 @@
     text-align: center;
 }
 
+.bar-canvas {
+    min-width: 325px;
+    max-height: 90px;
+    /*min-height: 100px;*/
+        /*min-height: 100px;*/
+}
+
+.chart-container {
+    min-height: 350px; /* Set a maximum width for the chart container */
+    min-width: 350px; /* Set a maximum width for the chart container */
+    margin: 0 auto; /* Center the chart container */
+}
+.chart-canvas {
+    max-width: 350px;
+    min-height: 250px;
+}
 
 /* Budgets Page Styles (budgets.html)*/
 .budget {
