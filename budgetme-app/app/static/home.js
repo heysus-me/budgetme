@@ -80,6 +80,92 @@ document.addEventListener('DOMContentLoaded', function() {
         const initialBudgetId = budgetSelect.value;
         updatePieChart(initialBudgetId);
     }
+
+    // Data for the balance bar chart
+    const balanceData = {
+        labels: ['Start Balance', 'End Balance'],
+        datasets: [{
+            label: 'Balance',
+            data: [1000, 800], // Replace with actual start and end balance values
+            backgroundColor: ['#9e9e9e', '#f44336'], // Neutral color for start balance, red for end balance
+            borderColor: ['#757575', '#d32f2f'], // Neutral border color for start balance, darker red for end balance
+            borderWidth: 1,
+            borderRadius: 5,
+            barThickness: 15, // Adjusted bar thickness
+            maxBarThickness: 15 // Maximum bar thickness
+        }]
+    };
+
+    // Configuration for the balance bar chart
+    const balanceConfig = {
+        type: 'bar',
+        data: balanceData,
+        options: {
+            indexAxis: 'y',
+            layout: {
+                padding: {
+                    top: 0,
+                    bottom: 0
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleFont: {
+                        size: 16
+                    },
+                    bodyFont: {
+                        size: 14
+                    },
+                    cornerRadius: 5
+                },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'start',
+                    offset: 10,
+                    color: '#000',
+                    font: {
+                        size: 14
+                    },
+                    formatter: function(value) {
+                        return '$' + value;
+                    }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    };
+    // Render the balance bar chart
+    const balanceBarChart = new Chart(
+        document.getElementById('balanceBarChart'),
+        balanceConfig
+    );
 });
 
 function generateColors(length) {
