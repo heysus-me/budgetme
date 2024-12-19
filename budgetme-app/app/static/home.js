@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     const budgetSelect = document.getElementById('budgetSelect');
-    const expensesPieChart = document.getElementById('expensesPieChart').getContext('2d');
-    let chart;
     let selectedBudgetId = null;
     let selectedTransactionId = null;
     const balanceBarChart = initializeBalanceBarChart();
@@ -9,79 +7,15 @@ document.addEventListener('DOMContentLoaded', function() {
     budgetSelect.addEventListener('change', function() {
         const selectedOption = budgetSelect.options[budgetSelect.selectedIndex];
         selectedBudgetId = selectedOption.value;
-        updatePieChart(selectedBudgetId);
         fetchBudgetData(selectedBudgetId);
+        // loadCategories(selectedBudgetId);
     });
-
-    function updatePieChart(budgetId) {
-        // Fetch the data for the selected budget
-        const url = budgetId ? `/api/expenses?budget_id=${encodeURIComponent(budgetId)}` : '/api/expenses';
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const categories = data.map(item => item.category);
-                const amounts = data.map(item => item.amount);
-
-                if (chart) {
-                    chart.destroy();
-                }
-
-                chart = new Chart(expensesPieChart, {
-                    type: 'pie',
-                    data: {
-                        labels: categories,
-                        datasets: [{
-                            data: amounts,
-                            backgroundColor: generateColors(categories.length)
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false, // Allow the chart to resize
-                        plugins: {
-                            legend: {
-                                display: true // Display the legend
-                            },
-                            title: {
-                                display: true,
-                                text: 'Expenses by Category'
-                            },
-                            datalabels: {
-                                display: true,
-                                formatter: (value, context) => {
-                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                    const percentage = (value / total * 100).toFixed(2) + '%';
-                                    return percentage;
-                                },
-                                color: '#fff',
-                                backgroundColor: '#000',
-                                borderRadius: 3,
-                                font: {
-                                    weight: 'bold'
-                                },
-                                anchor: 'end',
-                                align: 'center',
-                                offset: 0
-                            }
-                        },
-                        onClick: (event, elements) => {
-                            if (elements.length > 0) {
-                                const chartElement = elements[0];
-                                const category = chart.data.labels[chartElement.index];
-                                loadTransactions(category, budgetId);
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels] // Include the datalabels plugin
-                });
-            });
-    }
 
     // Initialize the chart with the first budget if available
     if (budgetSelect.value) {
         const initialBudgetId = budgetSelect.value;
-        updatePieChart(initialBudgetId);
         fetchBudgetData(initialBudgetId);
+        // loadCategories(initialBudgetId);
     }
 
     function initializeBalanceBarChart() {
@@ -168,28 +102,59 @@ document.addEventListener('DOMContentLoaded', function() {
         return new Chart(document.getElementById('balanceBarChart'), balanceConfig);
     }
 
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure selectedBudgetId is defined and valid
+        const selectedBudgetId = getSelectedBudgetId();
+        if (selectedBudgetId) {
+            fetchBudgetData(selectedBudgetId);
+        } else {
+            console.error('No valid budget ID selected');
+        }
+    });
+    
+    function getSelectedBudgetId() {
+        // Logic to get the selected budget ID, e.g., from a dropdown or other UI element
+        const budgetSelect = document.getElementById('budgetSelect');
+        return budgetSelect ? budgetSelect.value : null;
+    }
+    
     function fetchBudgetData(budgetId) {
-        fetch(`/api/budgets/${budgetId}`)
+        if (!budgetId) {
+            console.error('Invalid budget ID: ', budgetId);
+            return;
+        }
+    
+        fetch(`/api/monthlybudgets/${budgetId}`)
             .then(response => response.json())
             .then(data => {
-                updateBalanceBarChart(data.income, data.expenses);
-                updateBalanceInfo(data.start_balance, data.end_balance);
+                if (Array.isArray(data.monthly_budgets)) {
+                    data.monthly_budgets.forEach(budget => {
+                        updateBalanceBarChart(budget.income, budget.expenses);
+                        updateBalanceInfo(budget.starting_balance, budget.end_balance);
+                    });
+                } else if (data) {
+                    const budget = data;
+                    updateBalanceBarChart(budget.income, budget.expenses);
+                    updateBalanceInfo(budget.starting_balance, budget.end_balance);
+                } else {
+                    console.error('Expected an array or a single budget object');
+                }
             })
             .catch(error => console.error('Error fetching budget data:', error));
     }
-
-    function updateBalanceBarChart(startBalance, endBalance) {
+    
+    function updateBalanceBarChart(income, expenses) {
         const balanceBarChart = Chart.getChart('balanceBarChart');
-        balanceBarChart.data.datasets[0].data = [startBalance, endBalance];
+        balanceBarChart.data.datasets[0].data = [income, expenses];
         balanceBarChart.update();
     }
-
-    function updateBalanceInfo(startBalance, endBalance) {
-        document.getElementById('startBalance').textContent = `$${startBalance.toFixed(2)}`;
+    
+    function updateBalanceInfo(startingBalance, endBalance) {
+        document.getElementById('startBalance').textContent = `$${startingBalance.toFixed(2)}`;
         document.getElementById('currentBalance').textContent = `$${endBalance.toFixed(2)}`;
     }
 
-    // Handle form submission for adding transactions
+    // Modal functionality for adding transactions
     document.getElementById('transactionForm').addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(event.target);
@@ -199,75 +164,25 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            const transactionData = data;
             alert('Transaction added successfully');
             closeAddTransactionModal();
-            // Optionally, refresh the transactions list or update the charts
-            fetchBudgetData(selectedBudgetId);
+            // Refresh budget data using monthly_budget_id from transaction response
+            console.log(transactionData['transaction']['monthly_budget_id']);
+            fetchBudgetData(transactionData['transaction']['monthly_budget_id']);
         })
         .catch(error => console.error('Error:', error));
     });
 });
 
-function generateColors(length) {
-    const colors = [];
-    for (let i = 0; i < length; i++) {
-        const color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 75%)`;
-        colors.push(color);
-    }
-    return colors;
-}
-
-function loadTransactions(category, budgetId) {
-    fetch(`/api/transactions?category=${encodeURIComponent(category)}&budget_id=${encodeURIComponent(budgetId)}`)
-        .then(response => response.json())
-        .then(transactions => {
-            const container = document.getElementById('transactionsContainer');
-            container.innerHTML = ''; // Clear previous transactions
-
-            if (transactions.length === 0) {
-                container.innerHTML = '<p>No transactions found for this category.</p>';
-                return;
-            }
-
-            transactions.forEach(transaction => {
-                const transactionDiv = document.createElement('div');
-                transactionDiv.classList.add('transaction-item', 'card', 'shadow-sm', 'mb-3', 'p-3', 'rounded');
-
-                const dateAmountDiv = document.createElement('div');
-                dateAmountDiv.classList.add('transaction-date-amount', 'd-flex', 'justify-content-between', 'align-items-center');
-
-                const dateDiv = document.createElement('div');
-                dateDiv.classList.add('transaction-date', 'text-muted');
-                dateDiv.textContent = transaction.date;
-
-                const amountDiv = document.createElement('div');
-                amountDiv.classList.add('transaction-amount', 'font-weight-bold');
-                amountDiv.textContent = `$${transaction.amount}`;
-
-                const descriptionDiv = document.createElement('div');
-                descriptionDiv.classList.add('transaction-description', 'mt-2');
-                descriptionDiv.textContent = transaction.description;
-
-                dateAmountDiv.appendChild(dateDiv);
-                dateAmountDiv.appendChild(amountDiv);
-
-                transactionDiv.appendChild(dateAmountDiv);
-                transactionDiv.appendChild(descriptionDiv);
-
-                transactionDiv.addEventListener('click', () => {
-                    openTransactionDetailsModal(transaction);
-                });
-
-                container.appendChild(transactionDiv);
-            });
-        });
-}
-// Modal functionality for adding transactions
 function openAddTransactionModal() {
     document.getElementById('addTransactionModal').style.display = 'block';
 }
 
-// Modal functionality for transaction details
+function closeAddTransactionModal() {
+    document.getElementById('addTransactionModal').style.display = 'none';
+}
+
 function openTransactionDetailsModal(transaction) {
     selectedTransactionId = transaction.id;
     fetch(`/api/transaction/${transaction.id}`)
@@ -291,7 +206,6 @@ function closeTransactionDetailsModal() {
     document.getElementById('transactionDetailsModal').style.display = 'none';
 }
 
-// Modal functionality for editing transactions
 function openEditTransactionModal() {
     closeTransactionDetailsModal();
     fetch(`/api/transaction/${selectedTransactionId}`)
@@ -318,11 +232,35 @@ function editTransaction() {
     .then(data => {
         alert('Transaction updated successfully');
         closeEditTransactionModal();
-        openTransactionDetails();
+        openTransactionDetailsModal({ id: selectedTransactionId });
         // Optionally, refresh the transactions list or pie chart
     })
     .catch(error => console.error('Error:', error));
 }
+
 function closeEditTransactionModal() {
     document.getElementById('editTransactionModal').style.display = 'none';
 }
+
+
+function toggleBudgetField() {
+    const type = document.getElementById('type').value;
+    const budgetGroup = document.getElementById('budgetGroup');
+    const budgetSelect = document.getElementById('budget_id');
+    const categoryGroup = document.getElementById('categoryGroup');
+    const categorySelect = document.getElementById('category_id');
+    // const categorySelect = document.getElementById('category_id');
+    
+    if (type === 'income') {
+        budgetGroup.style.display = 'none';
+        budgetSelect.removeAttribute('required');
+        budgetSelect.value = '1';
+    } else {
+        budgetGroup.style.display = 'block';
+        categoryGroup.style.display = 'block';
+        budgetSelect.setAttribute('required', '');
+    }
+}
+
+// Call on page load to set initial state
+document.addEventListener('DOMContentLoaded', toggleBudgetField);

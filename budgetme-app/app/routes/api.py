@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ..models import Transaction, Budget, Category, db
+from ..models import Transaction, Budget, Category, MonthlyBudget, db
 from datetime import datetime
 
 api_bp = Blueprint('api', __name__)
@@ -93,6 +93,7 @@ def add_transaction():
         'type': new_transaction.type,
         'date': new_transaction.date.strftime('%Y-%m-%d'),
         'budget_id': new_transaction.budget_id,
+        'monthly_budget_id': new_transaction.budget.monthly_budget_id,
         'category_id': new_transaction.category_id
     }})
 
@@ -159,8 +160,9 @@ def add_budget():
     name = request.form['name']
     start_balance = float(request.form['start_balance'])
     user_id = int(request.form['user_id'])
+    monthly_budget_id = int(request.form['monthly_budget_id'])
 
-    new_budget = Budget(name=name, start_balance=start_balance, user_id=user_id)
+    new_budget = Budget(name=name, start_balance=start_balance, user_id=user_id, monthly_budget_id=monthly_budget_id)
     db.session.add(new_budget)
     db.session.commit()
 
@@ -168,14 +170,15 @@ def add_budget():
         'id': new_budget.id,
         'name': new_budget.name,
         'start_balance': new_budget.start_balance,
-        'user_id': new_budget.user_id
+        'user_id': new_budget.user_id,
+        'monthly_budget_id': new_budget.monthly_budget_id,
     }})
 
 @api_bp.route('/budgets/<int:budget_id>', methods=['PUT'])
 def update_budget(budget_id):
     budget = Budget.query.get_or_404(budget_id)
     budget.name = request.form['name']
-    budget.start_balance = float(request.form['amount'])
+    budget.start_balance = float(request.form['start_balance'])
     budget.user_id = int(request.form['user_id'])
     db.session.commit()
 
@@ -246,3 +249,107 @@ def delete_category(category_id):
     db.session.delete(category)
     db.session.commit()
     return jsonify({'message': 'Category deleted successfully'})
+
+# Months CRUD
+@api_bp.route('/monthlybudgets', methods=['GET'])
+@api_bp.route('/monthlybudgets/<int:budget_id>', methods=['GET'])
+def get_monthlybudgets(budget_id=None):
+    if budget_id:
+        mb = MonthlyBudget.query.get_or_404(budget_id)
+        return jsonify( {
+                'id': mb.id,
+                'name': mb.name,
+                'year': mb.year,
+                'month': mb.month,
+                'created_at': mb.created_at.isoformat(),
+                'user_id': mb.user_id,
+                'starting_balance': mb.starting_balance,
+                'income': mb.income,
+                'expenses': mb.expenses,
+                'end_balance': mb.end_balance
+            }
+        )
+    else:
+        monthly_budgets = MonthlyBudget.query.all()
+        return jsonify({
+            'monthly_budgets': [{
+                'id': mb.id,
+                'name': mb.name,
+                'year': mb.year,
+                'month': mb.month,
+                'created_at': mb.created_at.isoformat(),
+                'user_id': mb.user_id,
+                'starting_balance': mb.starting_balance,
+                'income': mb.income,
+                'expenses': mb.expenses,
+                'end_balance': mb.end_balance
+            } for mb in monthly_budgets]
+        })
+
+@api_bp.route('/monthlybudgets', methods=['POST'])
+def add_monthlybudget():
+    name = request.form['name']
+    year = int(request.form['year'])
+    month = int(request.form['month'])
+    user_id = int(request.form['user_id'])
+    starting_balance = float(request.form.get('starting_balance', 0.0))
+
+    new_mb = MonthlyBudget(
+        name=name,
+        year=year,
+        month=month,
+        user_id=user_id,
+        starting_balance=starting_balance
+    )
+    db.session.add(new_mb)
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Monthly Budget added successfully',
+        'monthly_budget': {
+            'id': new_mb.id,
+            'name': new_mb.name,
+            'year': new_mb.year,
+            'month': new_mb.month,
+            'created_at': new_mb.created_at.isoformat(),
+            'user_id': new_mb.user_id,
+            'starting_balance': new_mb.starting_balance,
+            'income': new_mb.income,
+            'expenses': new_mb.expenses,
+            'end_balance': new_mb.end_balance
+        }
+    })
+
+@api_bp.route('/monthlybudgets/<int:monthly_budget_id>', methods=['PUT'])
+def update_monthlybudget(monthly_budget_id):
+    mb = MonthlyBudget.query.get_or_404(monthly_budget_id)
+    mb.name = request.form['name']
+    mb.year = int(request.form['year'])
+    mb.month = int(request.form['month'])
+    mb.user_id = int(request.form['user_id'])
+    mb.starting_balance = float(request.form.get('starting_balance', mb.starting_balance))
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Monthly Budget updated successfully',
+        'monthly_budget': {
+            'id': mb.id,
+            'name': mb.name,
+            'year': mb.year,
+            'month': mb.month,
+            'created_at': mb.created_at.isoformat(),
+            'user_id': mb.user_id,
+            'starting_balance': mb.starting_balance,
+            'income': mb.income,
+            'expenses': mb.expenses,
+            'end_balance': mb.end_balance
+        }
+    })
+
+@api_bp.route('/monthlybudgets/<int:monthly_budget_id>', methods=['DELETE'])
+def delete_monthlybudget(monthly_budget_id):
+    mb = MonthlyBudget.query.get_or_404(monthly_budget_id)
+    db.session.delete(mb)
+    db.session.commit()
+
+    return jsonify({'message': 'Monthly Budget deleted successfully'})

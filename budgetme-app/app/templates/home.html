@@ -6,10 +6,10 @@
 
 <!-- The Budgets selection -->
 <div class="budget-selection">
-    <label for="budgetSelect">Select a Budget:</label>
+    <label for="budgetSelect">Select a Monthly Budget:</label>
     <select id="budgetSelect" class="form-control">
-        {% for budget in budgets %}
-            <option value="{{ budget.id }}">{{ budget.name }}</option>
+        {% for monthly_budget in monthly_budgets %}
+            <option value="{{ monthly_budget.id }}">{{ monthly_budget.name }}</option>
         {% endfor %}
     </select>
 </div>
@@ -33,9 +33,39 @@
 <!-- Add Transaction Button -->
 <button type="button" class="btn btn-primary" onclick="openAddTransactionModal()">Add Transaction</button>
 
-<!-- Pie Chart for Expenses -->
-<div class="chart-container">
-    <canvas id="expensesPieChart" class="chart-canvas"></canvas>
+<!-- Budget Cards Section -->
+<div class="container mt-4">
+    <h3 class="section-title mb-4">Your Budgets</h3>
+    <div class="row g-4">
+        {% for budget in budgets %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="budget-card">
+                <div class="budget-card-header">
+                    <h5>{{ budget.name }}</h5>
+                    <span class="badge {% if budget.start_balance > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                        ${{ budget.start_balance }}
+                    </span>
+                </div>
+                <div class="budget-card-body">
+                    <p class="description">{{ budget.description }}</p>
+                    <div class="progress mb-3">
+                        <div>
+                        {% if budget.start_balance > 0 %}
+                            {{ (budget.expenses / budget.start_balance * 100)|round }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                        </div>
+                    </div>
+                    <div class="budget-info">
+                        <span>Spent: ${{ budget.expenses }}</span>
+                        <span>Remaining: ${{ budget.start_balance - budget.expenses }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <!-- Transactions Table -->
@@ -48,6 +78,13 @@
         <h2>Add Transaction</h2>
         <form id="transactionForm">
             <div class="form-group">
+                <label for="type">Type</label>
+                <select class="form-control" id="type" name="type" required onchange="toggleBudgetField()">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="description">Description</label>
                 <input type="text" class="form-control" id="description" name="description" required>
             </div>
@@ -56,17 +93,10 @@
                 <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
             </div>
             <div class="form-group">
-                <label for="type">Type</label>
-                <select class="form-control" id="type" name="type" required>
-                    <option value="expense">Expense</option>
-                    <option value="income">Income</option>
-                </select>
-            </div>
-            <div class="form-group">
                 <label for="date">Date:</label>
                 <input type="date" id="date" name="date" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="budgetGroup">
                 <label for="budget_id">Budget</label>
                 <select class="form-control" id="budget_id" name="budget_id" required>
                     {% for budget in budgets %}
@@ -74,7 +104,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="categoryGroup">
                 <label for="category_id">Category</label>
                 <select class="form-control" id="category_id" name="category_id">
                     <option value="">None</option>

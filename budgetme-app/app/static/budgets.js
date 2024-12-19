@@ -1,55 +1,26 @@
-function editBudget(budgetId) {
-    // Implement the logic to edit the budget
-    console.log('Edit budget with ID:', budgetId);
-    // Redirect to the edit budget page or open a modal
-    //window.location.href = `/edit-budget/${budgetId}`;
+function showBudgetMenu(event, budgetId) {
+    event.stopPropagation();
+    const menu = document.getElementById(`menu-${budgetId}`);
+    // Hide all other menus
+    document.querySelectorAll('.budget-menu').forEach(m => {
+        if (m.id !== `menu-${budgetId}`) {
+            m.classList.remove('show');
+        }
+    });
+    menu.classList.toggle('show');
 }
 
-function deleteBudget(budgetId) {
-    // Implement the logic to delete the budget
-    console.log('Delete budget with ID:', budgetId);
-    if (confirm('Are you sure you want to delete this budget?')) {
-        fetch(`/api/budgets/${budgetId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                // Remove the budget element from the DOM
-                const budgetElement = document.getElementById(`budget-${budgetId}`);
-                if (budgetElement) {
-                    budgetElement.remove();
-                } else {
-                    console.error(`Element with ID budget-${budgetId} not found.`);
-                }
-                // Refresh the page content
-                location.reload();
-            } else {
-                alert('Failed to delete the budget.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to delete the budget.');
-        });
-    }
-}
-
-// Modal functionality for adding budgets
-function openNewBudgetModal() {
+function openBudgetModal(){
     document.getElementById('addBudgetModal').style.display = 'block';
 }
 
-function closeNewBudgetModal() {
+function closeBudgetModal() {
     document.getElementById('addBudgetModal').style.display = 'none';
 }
 
-// Handle form submission for adding budgets
-document.getElementById('budgetForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
+function addBudget() {
+    const formData = new FormData(document.getElementById('addBudgetForm'));
+
     fetch('/api/budgets', {
         method: 'POST',
         body: formData
@@ -57,9 +28,64 @@ document.getElementById('budgetForm').addEventListener('submit', function(event)
     .then(response => response.json())
     .then(data => {
         alert('Budget added successfully');
-        closeNewBudgetModal();
-        // Refresh the page content
+        closeBudgetModal();
         location.reload();
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error adding budget:', error));
+}
+
+function openEditBudgetModal(budgetId) {
+    fetch(`/api/budgets/${budgetId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('editBudgetId').value = data.id;
+            document.getElementById('editName').value = data.name;
+            document.getElementById('editStartBalance').value = data.start_balance;
+            document.getElementById('editUserId').value = data.user_id;
+            document.getElementById('editMonthlyBudgetId').value = data.monthly_budget_id;
+            document.getElementById('editBudgetModal').style.display = 'block';
+        })
+        .catch(error => console.error('Error fetching budget data:', error));
+}
+
+function closeEditBudgetModal() {
+    document.getElementById('editBudgetModal').style.display = 'none';
+}
+
+document.getElementById('editBudgetForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const budgetId = document.getElementById('editBudgetId').value;
+
+    fetch(`/api/budgets/${budgetId}`, {
+        method: 'PUT',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Budget updated successfully');
+        closeEditBudgetModal();
+        location.reload();
+    })
+    .catch(error => console.error('Error updating budget:', error));
+});
+
+function deleteBudget(budgetId) {
+    if (confirm('Are you sure you want to delete this budget?')) {
+        fetch(`/api/budgets/${budgetId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(() => location.reload())
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.budget-card')) {
+        document.querySelectorAll('.budget-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
 });

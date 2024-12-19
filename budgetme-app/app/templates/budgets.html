@@ -1,42 +1,125 @@
 {% extends "base.html" %}
 {% block content %}
 
-<script src="{{ url_for('static', filename='budgets.js') }}" defer></script>
+<script src="/static/budgets.js" defer></script>
 
-
-<button type="button" class="btn btn-primary" onclick="openNewBudgetModal()">New Budget</button>
-{% for budget in budgets %}
-
-<div class="budget">
-    <div class="budget-details">
-        <h2>{{ budget.name }}</h2>
+<div class="container mt-4">
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between mb-4">
+        <button class="btn btn-primary" onclick="openBudgetModal()">
+            <i class="fas fa-plus"></i> New Budget
+        </button>
     </div>
-    <div class="budget-actions">
-        <button type="button" class="btn btn-secondary" onclick="editBudget({{ budget.id }})">Edit</button>
-        <button type="button" class="btn btn-danger" onclick="deleteBudget({{ budget.id }})">Delete</button>
+
+    <!-- The Add Budget Modal -->
+    <div id="addBudgetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBudgetModal()">&times;</span>
+            <h2>Add Budget</h2>
+            <form id="addBudgetForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_balance">Goal</label>
+                    <input type="number" step="0.01" class="form-control" id="start_balance" name="start_balance" required>
+                </div>
+                <div class="form-group">
+                    <label for="user_id">User</label>
+                    <select class="form-control" id="user_id" name="user_id" required>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="monthly_budget_id">Monthly Budget</label>
+                    <select class="form-control" id="monthly_budget_id" name="monthly_budget_id" required>
+                        {% for monthly_budget in monthly_budgets %}
+                            <option value="{{ monthly_budget.id }}">{{ monthly_budget.name }} - {{ monthly_budget.year }}/{{ monthly_budget.month }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" onclick="addBudget()">Add Budget</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Cards Section -->
+    <!-- <div class="container mt-4">
+        <h3 class="section-title mb-4">Budgets</h3>
+        <div class="row g-4">
+            {% for budget in budgets %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ budget.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Start Balance: ${{ budget.start_balance }}</h6>
+                        <p class="card-text">User: {{ budget.user.username }}</p>
+                        <p class="card-text">Monthly Budget: {{ budget.monthly_budget.name }} - {{ budget.monthly_budget.year }}/{{ budget.monthly_budget.month }}</p>
+                        <p class="card-text">Created: {{ budget.created_at }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div> -->
+
+<div class="container mt-4">
+    <div class="row g-4">
+        {% for budget in budgets %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="budget-card" onclick="showBudgetMenu(event, {{ budget.id }})">
+                <div class="budget-card-header">
+                    <h5>{{ budget.name }}</h5>
+                    <span class="badge {% if budget.start_balance > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                        ${{ budget.start_balance }}
+                    </span>
+                </div>
+                <div class="budget-menu" id="menu-{{ budget.id }}">
+                    <button class="btn btn-sm btn-primary" onclick="openEditBudgetModal({{ budget.id }})">Update</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteBudget({{ budget.id }})">Delete</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
-{% endfor %}
 
-<!-- The Add Budget Modal -->
-<div id="addBudgetModal" class="modal">
+<!-- The Edit Budget Modal -->
+<div id="editBudgetModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeNewBudgetModal()">&times;</span>
-        <h2>Add Budget</h2>
-        <form id="budgetForm">
+        <span class="close" onclick="closeEditBudgetModal()">&times;</span>
+        <h2>Edit Budget</h2>
+        <form id="editBudgetForm">
+            <input type="hidden" id="editBudgetId" name="budget_id">
             <div class="form-group">
-                <label for="budgetUser">User int</label> <!-- TODO: Chagne it, currently hardcodes a user-->
-                <input type="number" class="form-control" id="budgetUser" name="user_id" required>
+                <label for="editName">Name</label>
+                <input type="text" class="form-control" id="editName" name="name" required>
             </div>
             <div class="form-group">
-                <label for="budgetName">Name</label>
-                <input type="text" class="form-control" id="budgetName" name="name" required>
+                <label for="editStartBalance">Start Balance</label>
+                <input type="number" step="0.01" class="form-control" id="editStartBalance" name="start_balance" required>
             </div>
             <div class="form-group">
-                <label for="budgetAmount">Starting balance</label>
-                <input type="number" step="0.01" class="form-control" id="budgetAmount" name="start_balance" required>
+                <label for="editUserId">User</label>
+                <select class="form-control" id="editUserId" name="user_id" required>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <button type="submit" class="btn btn-primary">Add Budget</button>
+            <div class="form-group">
+                <label for="editMonthlyBudgetId">Monthly Budget</label>
+                <select class="form-control" id="editMonthlyBudgetId" name="monthly_budget_id" required>
+                    {% for monthly_budget in monthly_budgets %}
+                        <option value="{{ monthly_budget.id }}">{{ monthly_budget.name }} - {{ monthly_budget.year }}/{{ monthly_budget.month }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Budget</button>
         </form>
     </div>
 </div>

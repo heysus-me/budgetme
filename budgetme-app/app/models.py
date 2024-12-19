@@ -1,7 +1,5 @@
-
 from . import db
 from datetime import datetime
-
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -11,13 +9,43 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.username}>'
 
+class MonthlyBudget(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    month = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    starting_balance = db.Column(db.Float, default=0.0, nullable=False)
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('monthly_budgets', lazy=True, cascade='all, delete-orphan'))
+    budgets = db.relationship('Budget', backref='monthly_budget', lazy=True, cascade='all, delete-orphan')
+
+    @property
+    def income(self):
+        return sum(budget.income for budget in self.budgets)
+
+    @property
+    def expenses(self):
+        return sum(budget.expenses for budget in self.budgets)
+        
+    @property
+    def end_balance(self):
+        return self.starting_balance + (self.income - self.expenses)
+
+    def __repr__(self):
+        return f'<MonthlyBudget {self.name} {self.year}>'
+
 class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     start_balance = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    monthly_budget_id = db.Column(db.Integer, db.ForeignKey('monthly_budget.id'), nullable=False)
 
     user = db.relationship('User', backref=db.backref('budgets', lazy=True))
+    transactions = db.relationship('Transaction', backref='budget', lazy=True, cascade='all, delete-orphan')
 
     @property
     def income(self):
@@ -33,14 +61,21 @@ class Budget(db.Model):
 
     def __repr__(self):
         return f'<Budget {self.name}>'
-    @property
-    def end_balance(self):
-        income = sum(transaction.amount for transaction in self.transactions if transaction.type == 'income')
-        expenses = sum(transaction.amount for transaction in self.transactions if transaction.type == 'expense')
-        return self.start_balance + income - expenses
+
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(200), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    type = db.Column(db.String(50), nullable=False)
+    date = db.Column(db.DateTime, default=datetime.now)
+    budget_id = db.Column(db.Integer, db.ForeignKey('budget.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
+
+    category = db.relationship('Category', backref=db.backref('transactions', lazy=True))
+
 
     def __repr__(self):
-        return f'<Budget {self.name}>'
+        return f'<Transaction {self.description} {self.amount}>'
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,38 +83,3 @@ class Category(db.Model):
 
     def __repr__(self):
         return f'<Category {self.name}>'
-
-class Transaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(200), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
-    type = db.Column(db.String(50), nullable=False)  # 'income' or 'expense'
-    date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    budget_id = db.Column(db.Integer, db.ForeignKey('budget.id'), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
-
-    budget = db.relationship('Budget', backref=db.backref('transactions', lazy=True))
-    category = db.relationship('Category', backref=db.backref('transactions', lazy=True))
-
-    def __repr__(self):
-        return f'<Transaction {self.description}>'
-
-class Settings(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    default_budget_id = db.Column(db.Integer, db.ForeignKey('budget.id'), nullable=True)
-
-    default_budget = db.relationship('Budget', backref=db.backref('settings', lazy=True))
-
-    def __repr__(self):
-        return f'<Settings {self.default_budget_id}>'
-
-class UserOptions(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    default_budget_id = db.Column(db.Integer, db.ForeignKey('budget.id'), nullable=True)
-
-    user = db.relationship('User', backref=db.backref('options', lazy=True))
-    default_budget = db.relationship('Budget', backref=db.backref('user_options', lazy=True))
-
-    def __repr__(self):
-        return f'<UserOptions {self.user_id} - {self.default_budget_id}>'
