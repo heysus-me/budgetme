@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Buttons for Expenses and Income -->
+<div class="container mt-4">
+    <div class="row">
+        <!-- Expense Transactions Column -->
+        <div class="col-md-6">
+            <h3 class="section-title mb-4">Expense Transactions</h3>
+            <div class="transaction-cards">
+                {% for transaction in transactions_expenses %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">{{ transaction.description }}</h5>
+                            <span class="card-subtitle text-muted">${{ transaction.amount }}</span>
+                        </div>
+                        <p class="card-text">Date: {{ transaction.date }}</p>
+                        <p class="card-text">Category: {{ transaction.category.name if transaction.category else 'N/A' }}</p>
+                        <p class="card-text">Budget: {{ transaction.budget.name }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Income Transactions Column -->
+        <div class="col-md-6">
+            <h3 class="section-title mb-4">Income Transactions</h3>
+            <div class="transaction-cards">
+                {% for transaction in transactions_income %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">{{ transaction.description }}</h5>
+                            <span class="card-subtitle text-muted">${{ transaction.amount }}</span>
+                        </div>
+                        <p class="card-text">Date: {{ transaction.date }}</p>
+                        <p class="card-text">Category: {{ transaction.category.name if transaction.category else 'N/A' }}</p>
+                        <p class="card-text">Budget: {{ transaction.budget.name }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

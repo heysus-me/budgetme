@@ -67,3 +67,11 @@ header h1 {
     right: 25px;
     font-size: 36px;
 }
+
+.subsection {
+    margin-left: 20px;
+}
+.subsection a {
+    display: block;
+    padding-left: 20px;
+}

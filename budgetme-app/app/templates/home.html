@@ -3,8 +3,6 @@
 {% block content %}
 
 <script src="/static/home.js" defer></script>
-
-<!-- The Budgets selection -->
 <div class="budget-selection">
     <label for="budgetSelect">Select a Monthly Budget:</label>
     <select id="budgetSelect" class="form-control">
@@ -17,11 +15,11 @@
 <!-- Bar Chart for Budget Balance -->
 <div id="balanceInfo" class="balance-info d-flex justify-content-between mt-3">
     <div class="balance-item">
-        <h3>Start Balance</h3>
+        <h4>Start Balance</h4>
         <p id="startBalance">$0.00</p>
     </div>
     <div class="balance-item">
-        <h3>End Balance</h3>
+        <h4>End Balance</h4>
         <p id="currentBalance">$0.00</p>
     </div>
 </div>
@@ -31,14 +29,23 @@
 </div>
 
 <!-- Add Transaction Button -->
-<button type="button" class="btn btn-primary" onclick="openAddTransactionModal()">Add Transaction</button>
+
+<div>
+    <h5 class="section-title mt-4">Quick Add</h5>
+    <div class="d-flex flex-wrap justify-content-center mb-3">
+        <button type="button" class="btn btn-primary mb-2 mx-2" onclick="openAddBudgetModal()">Budget</button>
+        <button type="button" class="btn btn-primary mb-2 mx-2" onclick="openAddTransactionModal()">Transaction</button>
+        <button type="button" class="btn btn-primary mb-2 mx-2" onclick="openAddCategoryModal()">Category</button>
+    </div>
+</div>
+
 
 <!-- Budget Cards Section -->
-<div class="container mt-4">
+<div id="budgetCardsContainer" class="container mt-4">
     <h3 class="section-title mb-4">Your Budgets</h3>
     <div class="row g-4">
         {% for budget in budgets %}
-        <div class="col-12 col-md-6 col-lg-4">
+        <div class="col-12 col-md-6 col-lg-4 budget-card-wrapper" data-monthly-budget-id="{{ budget.monthly_budget_id }}">
             <div class="budget-card">
                 <div class="budget-card-header">
                     <h5>{{ budget.name }}</h5>
@@ -49,12 +56,12 @@
                 <div class="budget-card-body">
                     <p class="description">{{ budget.description }}</p>
                     <div class="progress mb-3">
-                        <div>
-                        {% if budget.start_balance > 0 %}
-                            {{ (budget.expenses / budget.start_balance * 100)|round }}%
-                        {% else %}
-                            0%
-                        {% endif %}
+                        <div class="progress-bar {% if budget.start_balance > 0 %}bg-success{% else %}bg-danger{% endif %}" role="progressbar" style="width: {% if budget.start_balance > 0 %}{{ (budget.expenses / budget.start_balance * 100)|round }}%{% else %}0%{% endif %};">
+                            {% if budget.start_balance > 0 %}
+                                {{ (budget.expenses / budget.start_balance * 100)|round }}%
+                            {% else %}
+                                0%
+                            {% endif %}
                         </div>
                     </div>
                     <div class="budget-info">
@@ -94,7 +101,7 @@
             </div>
             <div class="form-group">
                 <label for="date">Date:</label>
-                <input type="date" id="date" name="date" required>
+                <input type="date" id="date" name="date" value="{{today_date}}" required>
             </div>
             <div class="form-group" id="budgetGroup">
                 <label for="budget_id">Budget</label>
@@ -173,6 +180,42 @@
         <div id="transactionDetails"></div>
         <button type="button" class="btn btn-primary" onclick="openEditTransactionModal()">Update</button>
         <button type="button" class="btn btn-danger" onclick="deleteTransaction()">Delete</button>
+    </div>
+</div>
+
+<!-- The Add Category Modal -->
+<div id="addCategoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddCategoryModal()">&times;</span>
+        <h2>Add Category</h2>
+        <form id="categoryForm">
+            <div class="form-group">
+                <label for="categoryName">Category Name</label>
+                <input type="text" class="form-control" id="categoryName" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Category</button>
+        </form>
+    </div>
+</div>
+
+<!-- The Add Budget Modal -->
+<div id="addBudgetModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddBudgetModal()">&times;</span>
+        <h2>Add Budget</h2>
+        <form id="budgetForm">
+            <div class="form-group">
+                <label for="budgetName">Budget Name</label>
+                <input type="text" class="form-control" id="budgetName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="startBalance">Start Balance</label>
+                <input type="number" step="0.01" class="form-control" id="startBalance" name="start_balance" required>
+            </div>
+            <input type="hidden" id="userId" name="user_id" value="{{ user.id }}" required>
+            <input type="hidden" id="monthlyBudgetId" name="monthly_budget_id" required>
+            <button type="submit" class="btn btn-primary">Add Budget</button>
+        </form>
     </div>
 </div>
 

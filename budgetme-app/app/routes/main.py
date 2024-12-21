@@ -10,13 +10,15 @@ def home():
     categories = Category.query.all()
     transactions = Transaction.query.all()
     today_date = datetime.now().date()
+    user = User.query.first()
     return render_template(
         'home.html',
         budgets=budgets,
         monthly_budgets=monthly_budgets,
         categories=categories,
         today_date=today_date, 
-        transactions=transactions)
+        transactions=transactions,
+        user=user)
 
 @main_bp.route('/monthly_budgets')
 def monthly_budgets():
@@ -38,6 +40,32 @@ def budgets():
         budgets=budgets,
         users=users,
         monthly_budgets=monthly_budgets
+    )
+
+@main_bp.route('/transactions')
+def transactions():
+    transactions_expenses = Transaction.query.filter_by(type='expense').all()
+    transactions_income = Transaction.query.filter_by(type='income').all()
+    return render_template(
+        'transactions.html',
+        transactions_expenses=transactions_expenses,
+        transactions_income=transactions_income
+    )
+
+@main_bp.route('/transactions_income')
+def transactions_income():
+    transactions_income = Transaction.query.filter_by(type='income').all()
+    return render_template(
+        'transactions_income.html',
+        transactions_income=transactions_income
+    )
+
+@main_bp.route('/transactions_expenses')
+def transactions_expenses():
+    transactions_expenses = Transaction.query.filter_by(type='expense').all()
+    return render_template(
+        'transactions_expenses.html',
+        transactions_expenses=transactions_expenses,
     )
 
 @main_bp.route('/categories')

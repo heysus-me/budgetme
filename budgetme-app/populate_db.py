@@ -12,7 +12,7 @@ app.app_context().push()
 fake = Faker()
 
 # Create a user
-user = User(username='jescobar', email='testuser@example.com')
+user = User(username='user01', email='testuser@example.com')
 db.session.add(user)
 print(user)
 db.session.commit()
@@ -23,7 +23,7 @@ month = MonthlyBudget(
     name=todays_date.strftime("%Y_%B"),
     year=todays_date.year,
     month=todays_date.month,
-    user_id=0
+    user_id=user.id
     )
 db.session.add(month)
 print(month)
@@ -32,16 +32,15 @@ db.session.commit()
 # Create budgets
 budgets = [
     {"name": 'Income', "start_balance": 0.0},
-    {"name": 'Rent', "start_balance": 0.0},
-    {"name": 'Utilities', "start_balance": 0.0},
-    {"name": 'Food', "start_balance": 0.0},
-    {"name": 'Transportation', "start_balance": 0.0},
-    {"name": 'Entertainment', "start_balance": 0.0},
+    {"name": 'Utilities', "start_balance": 450},
+    {"name": 'Food', "start_balance": 325},
+    {"name": 'Transportation', "start_balance": 120},
+    {"name": 'Entertainment', "start_balance": 50},
     {"name": 'Healthcare', "start_balance": 0.0},
-    {"name": 'Insurance', "start_balance": 0.0},
-    {"name": 'Savings', "start_balance": 0.0},
-    {"name": 'Debt Payments', "start_balance": 0.0},
-    {"name": 'Miscellaneous', "start_balance": 0.0}
+    {"name": 'Insurance', "start_balance": 252},
+    {"name": 'Savings', "start_balance": 50},
+    {"name": 'Debt Payments', "start_balance": 300},
+    {"name": 'Miscellaneous', "start_balance": 50}
     ]
 
 for budget in budgets:
@@ -60,9 +59,10 @@ db.session.commit()
 # Create common budget categories
 common_categories = [
     'Paycheck',
-    'Gas',
+    'payment',
     'Groceries',
     'Restaurants',
+    'Fast food',
     'Internet',
     'Electricity',
     'Water',
@@ -76,35 +76,3 @@ for category_name in common_categories:
     db.session.add(category)
 print(categories)
 db.session.commit()
-
-# # Create expense transactions for each category, except for Paycheck
-# for i in range(50):
-#     category = random.choice(categories[:-1])
-#     transaction = Transaction(
-#         description=fake.sentence(),
-#         amount=round(random.uniform(1, 100), 2),
-#         type='expense',
-#         date=fake.date_time_this_year(),
-#         category_id=category.id,
-#         budget_id=budget.id
-#     )
-#     print(transaction)
-#     db.session.add(transaction)
-# db.session.commit()
-
-# # Create income transactions for Paycheck category
-# for i in range(3):
-#     transaction = Transaction(
-#         description=fake.sentence(),
-#         amount=round(random.uniform(1000, 3000), 2),
-#         type='income',
-#         date=fake.date_time_this_year(),
-#         category_id=categories[-1].id,
-#         budget_id=budget.id
-#     )
-#     db.session.add(transaction)
-# print(transaction)
-# db.session.commit()
-
-
-# print("Database populated with 100 transactions.")

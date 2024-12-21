@@ -132,10 +132,14 @@ def get_budgets():
     budgets = Budget.query.all()
     budgets_data = [
         {
-            'id': budget.id,
-            'name': budget.name,
-            'amount': budget.start_balance,
-            'user_id': budget.user_id
+        'id': budget.id,
+        'name': budget.name,
+        'amount': budget.start_balance,
+        'income': budget.income,
+        'expenses': budget.expenses,
+        'start_balance': budget.start_balance,
+        'end_balance': budget.end_balance,
+        'user_id': budget.user_id
         }
         for budget in budgets
     ]
@@ -147,6 +151,7 @@ def get_budget(budget_id):
     budget_data = {
         'id': budget.id,
         'name': budget.name,
+        'amount': budget.start_balance,
         'income': budget.income,
         'expenses': budget.expenses,
         'start_balance': budget.start_balance,

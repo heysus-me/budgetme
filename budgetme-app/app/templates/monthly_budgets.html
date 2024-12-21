@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+
+<script src="/static/monthly_budgets.js" defer></script>
+
+<div class="container mt-4">
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between mb-4">
+        <button class="btn btn-primary" onclick="openNewMonthlyBudgetModal()">
+            <i class="fas fa-plus"></i> New Monthly Budget
+        </button>
+    </div>
+
+    <!-- The Add Monthly Budget Modal -->
+    <div id="addMonthlyBudgetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNewMonthlyBudgetModal()">&times;</span>
+            <h2>Add Monthly Budget</h2>
+            <form id="monthlyBudgetForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="starting_balance">Start balance</label>
+                    <input type="number" class="form-control" id="starting_balance" name="starting_balance" required>
+                </div>
+                <div class="form-group">
+                    <label for="year">Year</label>
+                    <input type="number" class="form-control" id="year" name="year" required>
+                </div>
+                <div class="form-group">
+                    <label for="month">Month</label>
+                    <input type="number" class="form-control" id="month" name="month" required>
+                </div>
+                <div class="form-group">
+                    <label for="user_id">User</label>
+                    <select class="form-control" id="user_id" name="user_id" required>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Monthly Budget</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- The Edit Monthly Budget Modal -->
+    <div id="editMonthlyBudgetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditMonthlyBudgetModal()">&times;</span>
+            <h2>Edit Monthly Budget</h2>
+            <form id="editMonthlyBudgetForm">
+                <input type="hidden" id="editMonthlyBudgetId" name="monthly_budget_id">
+                <div class="form-group">
+                    <label for="editName">Name</label>
+                    <input type="text" class="form-control" id="editName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editStartingBalance">Start balance</label>
+                    <input type="number" class="form-control" id="editStartingBalance" name="starting_balance" required>
+                </div>
+                <div class="form-group">
+                    <label for="editYear">Year</label>
+                    <input type="number" class="form-control" id="editYear" name="year" required>
+                </div>
+                <div class="form-group">
+                    <label for="editMonth">Month</label>
+                    <input type="number" class="form-control" id="editMonth" name="month" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUserId">User</label>
+                    <select class="form-control" id="editUserId" name="user_id" required>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Monthly Budget</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Monthly Budget Cards Section -->
+    <div class="container mt-4">
+        <h3 class="section-title mb-4">Monthly Budgets</h3>
+        <div class="row g-4">
+            {% for monthly_budget in budgets %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ monthly_budget.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ monthly_budget.year }}-{{ monthly_budget.month }}</h6>
+                        <p class="card-text">User: {{ monthly_budget.user.username }}</p>
+                        <p class="card-text">Created: {{ monthly_budget.created_at }}</p>
+                        <button class="btn btn-sm btn-primary" onclick="openEditMonthlyBudgetModal({{ monthly_budget.id }})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteMonthlyBudget({{ monthly_budget.id }})">Delete</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

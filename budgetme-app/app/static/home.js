@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const budgetSelect = document.getElementById('budgetSelect');
-    let selectedBudgetId = null;
-    let selectedTransactionId = null;
+    budgetSelect.addEventListener('change', function() {
+        const selectedBudgetId = budgetSelect.value;
+        filterBudgetCards(selectedBudgetId);
+    });
     const balanceBarChart = initializeBalanceBarChart();
 
     budgetSelect.addEventListener('change', function() {
@@ -10,6 +12,21 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchBudgetData(selectedBudgetId);
         // loadCategories(selectedBudgetId);
     });
+
+    function filterBudgetCards(monthlyBudgetId) {
+        const budgetCards = document.querySelectorAll('.budget-card-wrapper');
+        budgetCards.forEach(card => {
+            if (monthlyBudgetId === '' || card.dataset.monthlyBudgetId === monthlyBudgetId) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Initialize the display based on the selected budget
+    const initialBudgetId = budgetSelect.value;
+    filterBudgetCards(initialBudgetId);
 
     // Initialize the chart with the first budget if available
     if (budgetSelect.value) {
@@ -179,9 +196,13 @@ function openAddTransactionModal() {
     document.getElementById('addTransactionModal').style.display = 'block';
 }
 
+
 function closeAddTransactionModal() {
     document.getElementById('addTransactionModal').style.display = 'none';
+    location.reload(); // Reload the page
+    // reloadBudgetCards();
 }
+
 
 function openTransactionDetailsModal(transaction) {
     selectedTransactionId = transaction.id;
@@ -262,5 +283,107 @@ function toggleBudgetField() {
     }
 }
 
+function reloadBudgetCards() {
+    fetch('/api/budgets')
+        .then(response => response.json())
+        .then(budgets => {
+            let budgetCardsHtml = budgets.map(budget => `
+                <div class="col-12 col-md-6 col-lg-4 budget-card-wrapper" data-monthly-budget-id="${budget.monthly_budget_id}">
+                    <div class="budget-card">
+                        <div class="budget-card-header">
+                            <h5>${budget.name}</h5>
+                            <span class="badge ${budget.start_balance > 0 ? 'bg-success' : 'bg-danger'}">
+                                $${budget.start_balance}
+                            </span>
+                        </div>
+                        <div class="budget-card-body">
+                            <p class="description">${budget.description}</p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar ${budget.start_balance > 0 ? 'bg-success' : 'bg-danger'}" role="progressbar" style="width: ${budget.start_balance > 0 ? Math.round((budget.expenses / budget.start_balance) * 100) : 0}%;">
+                                    ${budget.start_balance > 0 ? Math.round((budget.expenses / budget.start_balance) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div class="budget-info">
+                                <span>Spent: $${budget.expenses}</span>
+                                <span>Remaining: $${budget.start_balance - budget.expenses}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('budgetCardsContainer').innerHTML = budgetCardsHtml;
+        })
+        .catch(error => console.error('Error:', error));
+}
+
 // Call on page load to set initial state
 document.addEventListener('DOMContentLoaded', toggleBudgetField);
+
+/* Add category functionality */
+// Function to open the Add Category modal
+function openAddCategoryModal() {
+    document.getElementById('addCategoryModal').style.display = 'block';
+}
+
+// Function to close the Add Category modal
+function closeAddCategoryModal() {
+    document.getElementById('addCategoryModal').style.display = 'none';
+    location.reload(); // Reload the page
+
+}
+
+// Handle the Add Category form submission
+document.getElementById('categoryForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    fetch('/api/categories', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Category added successfully');
+        closeAddCategoryModal();
+        // Optionally, refresh the categories list or update the UI
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+/* Add budget functionality */
+// Function to open the Add Budget modal
+function openAddBudgetModal() {
+    const selectedMonthlyBudgetId = getSelectedMonthlyBudgetId(); // Get the selected monthly budget ID
+;
+    document.getElementById('monthlyBudgetId').value = selectedMonthlyBudgetId;
+
+    document.getElementById('addBudgetModal').style.display = 'block';
+}
+
+// Function to close the Add Budget modal
+function closeAddBudgetModal() {
+    document.getElementById('addBudgetModal').style.display = 'none';
+    location.reload(); // Reload the page
+}
+
+// Handle the Add Budget form submission
+document.getElementById('budgetForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    fetch('/api/budgets', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Budget added successfully');
+        closeAddBudgetModal();
+        // Optionally, refresh the budgets list or update the UI
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+// Function to get the selected monthly budget ID
+function getSelectedMonthlyBudgetId() {
+    const budgetSelect = document.getElementById('budgetSelect');
+    return budgetSelect ? budgetSelect.value : null;
+}

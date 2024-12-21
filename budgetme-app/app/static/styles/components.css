@@ -306,3 +306,110 @@
     bottom: 0;
     left: 0;
 }
+
+/* Transaction Page Styles (transactions.html) */
+
+.transaction-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Reduced gap between cards */
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.5rem; /* Reduced margin between cards */
+}
+
+.card-body {
+    padding: 0.75rem; /* Reduced padding inside cards */
+    margin: 0; /* Removed margin inside cards */
+}
+
+.card-title {
+    font-size: 1rem; /* Reduced font size */
+    margin: 0; /* Removed margin */
+    margin-bottom: 0.5rem; /* Reduced margin below title */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-subtitle {
+    font-size: 0.875rem; /* Reduced font size */
+    margin: 0; /* Removed margin */
+    color: #6c757d;
+    margin-bottom: 0.5rem; /* Reduced margin below subtitle */
+}
+
+.card-text {
+    font-size: 0.8rem; /* Reduced font size */
+    color: #333;
+    margin-top: 0; /* Removed top margin */
+    margin-bottom: 0; /* Removed bottom margin */
+}
+
+@media (max-width: 768px) {
+    .transaction-cards {
+        gap: 0.5rem;
+    }
+
+    .card-body {
+        padding: 0.5rem; /* Further reduced padding for mobile */
+    }
+
+    .card-title {
+        font-size: 0.875rem; /* Further reduced font size for mobile */
+    }
+
+    .card-subtitle {
+        font-size: 0.75rem; /* Further reduced font size for mobile */
+    }
+
+    .card-text {
+        font-size: 0.75rem; /* Further reduced font size for mobile */
+        margin-top: 0; /* Removed top margin */
+    }
+}
+
+/* Style the tab */
+.tab {
+overflow: hidden;
+border: 1px solid #ccc;
+background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+background-color: inherit;
+float: left;
+border: none;
+outline: none;
+cursor: pointer;
+padding: 14px 16px;
+transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+display: none;
+padding: 6px 12px;
+border: 1px solid #ccc;
+border-top: none;
+}
+
+/* Override the height of the progress bar */
+.budget-card-body .progress {
+    height: 20px; /* Set the desired height */
+}
