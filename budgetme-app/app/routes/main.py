@@ -83,8 +83,11 @@ def transactions_category():
     transactions = query.all()
     budgets = Budget.query.all()
     budget = Budget.query.filter_by(id=budget_id).first()
+    categories = Category.query.filter_by(budget_id=budget_id).all()  # Query categories for the selected budget
+
     return render_template(
         'transactions_category.html',
         transactions=transactions,
         budgets=budgets,
-        budget=budget)
+        budget=budget,
+        categories=categories)

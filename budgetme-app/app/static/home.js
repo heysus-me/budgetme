@@ -393,3 +393,19 @@ function navigateToTransactions(monthlyBudgetId, budgetId, categoryId) {
     const url = `/transactions_category?monthly_budget_id=${monthlyBudgetId}&budget_id=${budgetId}`;
     window.location.href = url;
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Retrieve the stored budget ID from local storage
+    const storedBudgetId = localStorage.getItem('selectedBudgetId');
+    if (storedBudgetId) {
+        const budgetSelect = document.getElementById('budgetSelect');
+        budgetSelect.value = storedBudgetId;
+    }
+});
+
+function storeSelectedBudget() {
+    const budgetSelect = document.getElementById('budgetSelect');
+    const selectedBudgetId = budgetSelect.value;
+    // Store the selected budget ID in local storage
+    localStorage.setItem('selectedBudgetId', selectedBudgetId);
+}

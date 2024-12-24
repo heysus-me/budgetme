@@ -227,8 +227,9 @@ def get_category(category_id):
 @api_bp.route('/categories', methods=['POST'])
 def add_category():
     name = request.form['name']
+    budget_id = request.form['budget_id']
 
-    new_category = Category(name=name)
+    new_category = Category(name=name, budget_id=budget_id)
     db.session.add(new_category)
     db.session.commit()
 

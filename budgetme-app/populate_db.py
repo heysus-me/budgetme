@@ -55,24 +55,3 @@ for budget in budgets:
 db.session.add(budget)
 print(budget)
 db.session.commit()
-
-# Create common budget categories
-common_categories = [
-    'Paycheck',
-    'payment',
-    'Groceries',
-    'Restaurants',
-    'Fast food',
-    'Internet',
-    'Electricity',
-    'Water',
-    'Phone',
-]
-
-categories = []
-for category_name in common_categories:
-    category = Category(name=category_name)
-    categories.append(category)
-    db.session.add(category)
-print(categories)
-db.session.commit()

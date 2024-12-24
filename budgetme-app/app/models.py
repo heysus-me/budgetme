@@ -46,6 +46,7 @@ class Budget(db.Model):
 
     user = db.relationship('User', backref=db.backref('budgets', lazy=True))
     transactions = db.relationship('Transaction', backref='budget', lazy=True, cascade='all, delete-orphan')
+    categories = db.relationship('Category', backref='budget', lazy=True, cascade='all, delete-orphan')
 
     @property
     def income(self):
@@ -80,6 +81,7 @@ class Transaction(db.Model):
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    budget_id = db.Column(db.Integer, db.ForeignKey('budget.id'), nullable=False)
 
     def __repr__(self):
         return f'<Category {self.name}>'

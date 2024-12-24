@@ -5,7 +5,7 @@
 <script src="/static/home.js" defer></script>
 <div class="budget-selection">
     <label for="budgetSelect">Select a Monthly Budget:</label>
-    <select id="budgetSelect" class="form-control">
+    <select id="budgetSelect" class="form-control" onchange="storeSelectedBudget()">
         {% for monthly_budget in monthly_budgets %}
             <option value="{{ monthly_budget.id }}">{{ monthly_budget.name }}</option>
         {% endfor %}
@@ -194,6 +194,14 @@
             <div class="form-group">
                 <label for="categoryName">Category Name</label>
                 <input type="text" class="form-control" id="categoryName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="budgetSelect">Select Budget</label>
+                <select class="form-control" id="budgetSelect" name="budget_id" required>
+                    {% for budget in budgets %}
+                        <option value="{{ budget.id }}">{{ budget.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <button type="submit" class="btn btn-primary">Add Category</button>
         </form>
