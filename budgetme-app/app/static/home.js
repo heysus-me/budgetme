@@ -387,3 +387,9 @@ function getSelectedMonthlyBudgetId() {
     const budgetSelect = document.getElementById('budgetSelect');
     return budgetSelect ? budgetSelect.value : null;
 }
+
+// Function to navigate to the transaction_category.html page
+function navigateToTransactions(monthlyBudgetId, budgetId, categoryId) {
+    const url = `/transactions_category?monthly_budget_id=${monthlyBudgetId}&budget_id=${budgetId}`;
+    window.location.href = url;
+}

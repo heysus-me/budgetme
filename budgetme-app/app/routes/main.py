@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request
 from . import main_bp
 from ..models import Budget, Category, Transaction, MonthlyBudget, User
 from datetime import datetime
@@ -68,9 +68,23 @@ def transactions_expenses():
         transactions_expenses=transactions_expenses,
     )
 
-@main_bp.route('/categories')
-def categories():
-    categories = Category.query.all()
+@main_bp.route('/transactions_category')
+def transactions_category():
+    monthly_budget_id = request.args.get('monthly_budget_id')
+    budget_id = request.args.get('budget_id')
+
+    query = Transaction.query
+
+    if monthly_budget_id:
+        query = query.join(Budget).filter(Budget.monthly_budget_id == monthly_budget_id)
+    if budget_id:
+        query = query.filter_by(id=budget_id)
+
+    transactions = query.all()
+    budgets = Budget.query.all()
+    budget = Budget.query.filter_by(id=budget_id).first()
     return render_template(
-        'categories.html',
-        categories=categories)
+        'transactions_category.html',
+        transactions=transactions,
+        budgets=budgets,
+        budget=budget)

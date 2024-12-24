@@ -45,32 +45,34 @@
     <h3 class="section-title mb-4">Your Budgets</h3>
     <div class="row g-4">
         {% for budget in budgets %}
-        <div class="col-12 col-md-6 col-lg-4 budget-card-wrapper" data-monthly-budget-id="{{ budget.monthly_budget_id }}">
-            <div class="budget-card">
-                <div class="budget-card-header">
-                    <h5>{{ budget.name }}</h5>
-                    <span class="badge {% if budget.start_balance > 0 %}bg-success{% else %}bg-danger{% endif %}">
-                        ${{ budget.start_balance }}
-                    </span>
-                </div>
-                <div class="budget-card-body">
-                    <p class="description">{{ budget.description }}</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar {% if budget.start_balance > 0 %}bg-success{% else %}bg-danger{% endif %}" role="progressbar" style="width: {% if budget.start_balance > 0 %}{{ (budget.expenses / budget.start_balance * 100)|round }}%{% else %}0%{% endif %};">
-                            {% if budget.start_balance > 0 %}
-                                {{ (budget.expenses / budget.start_balance * 100)|round }}%
-                            {% else %}
-                                0%
-                            {% endif %}
+            {% if budget.name != 'Income' %}
+                <div class="col-12 col-md-6 col-lg-4 budget-card-wrapper" data-monthly-budget-id="{{ budget.monthly_budget_id }}" onclick="navigateToTransactions({{ budget.monthly_budget_id }}, {{ budget.id }}, null)">
+                    <div class="budget-card">
+                        <div class="budget-card-header">
+                            <h5>{{ budget.name }}</h5>
+                            <span class="badge {% if budget.start_balance > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                ${{ budget.start_balance }}
+                            </span>
+                        </div>
+                        <div class="budget-card-body">
+                            <p class="description">{{ budget.description }}</p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar {% if budget.start_balance > 0 %}bg-success{% else %}bg-danger{% endif %}" role="progressbar" style="width: {% if budget.start_balance > 0 %}{{ (budget.expenses / budget.start_balance * 100)|round }}%{% else %}0%{% endif %};">
+                                    {% if budget.start_balance > 0 %}
+                                        {{ (budget.expenses / budget.start_balance * 100)|round }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="budget-info">
+                                <span>Spent: ${{ budget.expenses }}</span>
+                                <span>Remaining: ${{ budget.start_balance - budget.expenses }}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="budget-info">
-                        <span>Spent: ${{ budget.expenses }}</span>
-                        <span>Remaining: ${{ budget.start_balance - budget.expenses }}</span>
-                    </div>
                 </div>
-            </div>
-        </div>
+            {% endif %}
         {% endfor %}
     </div>
 </div>
